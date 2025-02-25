@@ -25,7 +25,9 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Medicine, MedicineCreateInput, MedicineUpdateInput } from '@/types/medicine'
 import { medicineService } from '@/services/medicineService'
-import toast from 'react-hot-toast'
+import { toast } from 'react-hot-toast'
+import { showToast } from '@/app/contexts/CartContext'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function InventoryPage() {
   const [medicines, setMedicines] = useState<Medicine[]>([])
@@ -34,6 +36,10 @@ export default function InventoryPage() {
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [categoryFilter, setCategoryFilter] = useState<string>('')
+  const [stockFilter, setStockFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('name')
   const [formData, setFormData] = useState<Partial<Medicine>>({
     name: '',
     description: '',
@@ -47,17 +53,38 @@ export default function InventoryPage() {
     image: '',
     dosage: '',
   })
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     loadMedicines()
   }, [])
+
+  useEffect(() => {
+    const filterParam = searchParams.get('filter')
+    if (filterParam === 'low') {
+      setStockFilter('low')
+    } else if (filterParam === 'out') {
+      setStockFilter('out')
+    }
+    
+    const categoryParam = searchParams.get('category')
+    if (categoryParam) {
+      setCategoryFilter(categoryParam)
+    }
+    
+    const searchParam = searchParams.get('search')
+    if (searchParam) {
+      setSearchTerm(searchParam)
+    }
+  }, [searchParams])
 
   const loadMedicines = async () => {
     try {
       const data = await medicineService.getAll()
       setMedicines(data)
     } catch (error) {
-      toast.error('Failed to load medicines')
+      showToast('Failed to load medicines', 'error')
       console.error('Error loading medicines:', error)
     }
   }
@@ -82,17 +109,17 @@ export default function InventoryPage() {
           id: selectedMedicine.id,
           ...formData
         })
-        toast.success('Medicine updated successfully')
+        showToast('Medicine updated successfully', 'success')
       } else {
         await medicineService.create(formData as MedicineCreateInput)
-        toast.success('Medicine added successfully')
+        showToast('Medicine added successfully', 'success')
       }
       
       loadMedicines()
       handleCloseDialog()
     } catch (error) {
-      toast.error(isEditMode ? 'Failed to update medicine' : 'Failed to add medicine')
-      console.error('Error:', error)
+      console.error('Error in handleSubmit:', error)
+      showToast(isEditMode ? 'Failed to update medicine' : 'Failed to add medicine', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -100,8 +127,21 @@ export default function InventoryPage() {
 
   const handleEdit = (medicine: Medicine) => {
     setSelectedMedicine(medicine)
-    setFormData(medicine)
+    setFormData({
+      name: medicine.name || '',
+      description: medicine.description || '',
+      category: medicine.category || '',
+      price: medicine.price || 0,
+      originalPrice: medicine.originalPrice || 0,
+      stock: medicine.stock || 0,
+      threshold: medicine.threshold || 0,
+      manufacturer: medicine.manufacturer || '',
+      expiryDate: medicine.expiryDate || '',
+      image: medicine.image || '',
+      dosage: medicine.dosage || '',
+    })
     setIsEditMode(true)
+    setDialogOpen(true)
   }
 
   const handleDelete = async (id: string) => {
@@ -111,10 +151,10 @@ export default function InventoryPage() {
 
     try {
       await medicineService.delete(id)
-      toast.success('Medicine deleted successfully')
+      showToast('Medicine deleted successfully', 'success')
       loadMedicines()
     } catch (error) {
-      toast.error('Failed to delete medicine')
+      showToast('Failed to delete medicine', 'error')
       console.error('Error deleting medicine:', error)
     }
   }
@@ -135,6 +175,7 @@ export default function InventoryPage() {
       dosage: '',
     })
     setIsEditMode(false)
+    setDialogOpen(false)
   }
 
   const filteredMedicines = medicines.filter(medicine =>
@@ -146,6 +187,29 @@ export default function InventoryPage() {
     medicine.stock <= medicine.threshold
   )
 
+  const updateUrlWithFilters = () => {
+    const params = new URLSearchParams()
+    
+    if (stockFilter !== 'all') {
+      params.set('filter', stockFilter)
+    }
+    
+    if (categoryFilter) {
+      params.set('category', categoryFilter)
+    }
+    
+    if (searchTerm) {
+      params.set('search', searchTerm)
+    }
+    
+    const query = params.toString()
+    router.push(`/admin/inventory${query ? '?' + query : ''}`, { scroll: false })
+  }
+
+  useEffect(() => {
+    updateUrlWithFilters()
+  }, [stockFilter, categoryFilter, searchTerm])
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -154,7 +218,7 @@ export default function InventoryPage() {
           <p className="text-gray-600">Manage your medicine inventory</p>
         </div>
 
-        <Dialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-green-500 hover:bg-green-600">
               <Plus className="h-4 w-4 mr-2" />

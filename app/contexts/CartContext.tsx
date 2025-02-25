@@ -16,6 +16,27 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
+// Make the showToast function exportable
+export const showToast = (() => {
+  // Use a debounce mechanism to prevent multiple toasts for the same action
+  const recentToasts: Record<string, number> = {};
+  
+  return (message: string, type: 'success' | 'error' = 'success') => {
+    const now = Date.now();
+    const key = `${type}:${message}`;
+    
+    // Only show toast if same message wasn't shown in last 2 seconds
+    if (!recentToasts[key] || now - recentToasts[key] > 2000) {
+      recentToasts[key] = now;
+      if (type === 'success') {
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    }
+  };
+})();
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
@@ -51,12 +72,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             : item
         )
         if (isInitialized) {
-          toast.success(`Added another ${newItem.name} to cart`)
+          showToast(`Added another ${newItem.name} to cart`);
         }
         return updatedItems
       } else {
         if (isInitialized) {
-          toast.success(`${newItem.name} added to cart`)
+          showToast(`${newItem.name} added to cart`);
         }
         return [...currentItems, { ...newItem, quantity: 1 }]
       }
@@ -67,7 +88,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(currentItems => {
       const itemToRemove = currentItems.find(item => item.id === itemId)
       if (itemToRemove && isInitialized) {
-        toast.success(`${itemToRemove.name} removed from cart`)
+        showToast(`${itemToRemove.name} removed from cart`);
       }
       return currentItems.filter(item => item.id !== itemId)
     })
@@ -88,7 +109,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       )
 
       if (isInitialized && quantity !== item.quantity) {
-        toast.success(`Updated ${item.name} quantity`)
+        showToast(`Updated ${item.name} quantity`);
       }
 
       return updatedItems
@@ -98,7 +119,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clearCart = () => {
     setItems([])
     if (isInitialized) {
-      toast.success('Cart cleared')
+      showToast('Cart cleared');
     }
   }
 

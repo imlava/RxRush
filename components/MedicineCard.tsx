@@ -23,7 +23,7 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
 
   try {
     const cartContext = useCart();
-    addToCart = cartContext.addToCart;
+    addToCart = cartContext.addItem;
   } catch (error) {
     console.error('CartProvider not found:', error);
     // Handle the case where CartProvider is not available

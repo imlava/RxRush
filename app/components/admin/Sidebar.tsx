@@ -10,7 +10,12 @@ import {
   Settings,
   ChevronLeft,
   Menu,
-  X
+  X,
+  Home,
+  ShoppingCart,
+  Package,
+  CreditCard,
+  MessageSquare
 } from 'lucide-react'
 
 const sidebarLinks = [
@@ -33,6 +38,21 @@ const sidebarLinks = [
     href: '/admin/settings',
     label: 'Settings',
     icon: Settings
+  },
+  {
+    href: '/admin/inventory',
+    label: 'Inventory',
+    icon: Package
+  },
+  {
+    href: '/admin/payments',
+    label: 'Payments',
+    icon: CreditCard
+  },
+  {
+    href: '/admin/support',
+    label: 'Support',
+    icon: MessageSquare
   }
 ]
 
