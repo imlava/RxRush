@@ -23,6 +23,12 @@ const nextConfig = {
       },
     ]
   },
+  // Skip generating error pages for static export
+  experimental: {
+    // This prevents Next.js from generating certain error pages
+    skipTrailingSlashRedirect: true,
+    skipMiddlewareUrlNormalize: true,
+  },
 };
 
 module.exports = nextConfig;

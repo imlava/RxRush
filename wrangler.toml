@@ -2,9 +2,9 @@
 name = "rxrush"
 compatibility_date = "2024-02-25"
 
-# Configure build output directory with direct Next.js build command
+# Configure build using our pre-build script and next-on-pages
 [build]
-command = "npx @cloudflare/next-on-pages@1"
+command = "npm run pages:build"
 
 [build.upload]
 format = "directory"
@@ -14,6 +14,22 @@ format = "directory"
 bucket = ".vercel/output/static"
 pages_build_output_dir = ".vercel/output/static"
 
+# Handle 404 and other errors using our static HTML pages
+[routes]
+include = ["/*"]
+exclude = ["/api/*", "/_next/*"]
+
+[[routes.errors]]
+error = [404]
+status = 404
+static = "404.html"
+
+[[routes.errors]]
+error = "*"
+status = 500
+static = "500.html"
+
 # Additional environment variables
 [env.production]
 NODE_VERSION = "18.18.0"
+IS_CLOUDFLARE_BUILD = "true"
