@@ -2,14 +2,9 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import type { ErrorProps } from 'next/error'
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string }
-  reset: () => void
-}) {
+export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     console.error(error)
   }, [error])
@@ -21,7 +16,7 @@ export default function Error({
         <p className="text-xl text-gray-600">Something went wrong</p>
         <div className="space-x-4">
           <button
-            onClick={() => reset()}
+            onClick={reset}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
           >
             Try again
