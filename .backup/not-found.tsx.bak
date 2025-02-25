@@ -1,0 +1,4 @@
+// Empty not-found page to avoid React Error #130 during static generation
+export default function NotFound() {
+  return null;
+}

@@ -1,0 +1,5 @@
+'use client';
+// Empty error page to avoid React Error #130 during static generation
+export default function Error() {
+  return null;
+}

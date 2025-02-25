@@ -1,0 +1,41 @@
+/**
+ * Special Next.js config for Cloudflare Pages to avoid React Error #130
+ * This is used by the @cloudflare/next-on-pages tool
+ */
+
+/** @type {import('next').NextConfig} */
+module.exports = {
+  // Use the app directory features but disable error pages
+  experimental: {
+    // appDir is no longer experimental in Next.js 14
+    optimizePackageImports: ['react', 'react-dom'],
+    serverComponentsExternalPackages: [],
+    disableOptimizedLoading: true,
+  },
+  
+  // Use static export since we've added generateStaticParams to our API routes
+  output: 'export',
+  distDir: '.next',
+  
+  // Basic configuration settings
+  trailingSlash: true,
+  reactStrictMode: true,
+  swcMinify: false,
+  poweredByHeader: false,
+  
+  // Disable image optimization for static export
+  images: {
+    unoptimized: true,
+  },
+  
+  // Ignore build errors
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Override default browser error page with custom pages
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+}; 
