@@ -2,9 +2,9 @@
 name = "rxrush"
 compatibility_date = "2024-02-25"
 
-# Configure build output directory with custom script
+# Configure build output directory with direct Next.js build command
 [build]
-command = "bash ./cloudflare-pages-build.sh"
+command = "npm run build:cloudflare"
 
 [build.upload]
 format = "directory"
