@@ -19,11 +19,11 @@ interface MedicineCardProps {
 }
 
 export default function MedicineCard({ medicine }: MedicineCardProps) {
-  let addToCart: ((item: { id: string; name: string; dosage: string; price: number; quantity: number }) => void) | undefined;
+  let addItem: ((item: { id: string; name: string; dosage: string; price: number; quantity: number }) => void) | undefined;
 
   try {
     const cartContext = useCart();
-    addToCart = cartContext.addToCart;
+    addItem = cartContext.addItem;
   } catch (error) {
     console.error('CartProvider not found:', error);
     // Handle the case where CartProvider is not available
@@ -31,8 +31,8 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation when clicking the button
-    if (addToCart) {
-      addToCart({
+    if (addItem) {
+      addItem({
         id: medicine.id,
         name: medicine.name,
         dosage: medicine.dosage,
@@ -63,7 +63,7 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
           <Button 
             onClick={handleAddToCart}
             className="w-full bg-primary hover:bg-primary/90"
-            disabled={!addToCart}
+            disabled={!addItem}
           >
             Add to Cart
           </Button>

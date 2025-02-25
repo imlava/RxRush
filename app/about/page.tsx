@@ -1,12 +1,13 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import type { NextPage } from 'next';
 
 export const metadata: Metadata = {
   title: 'About Us | RxRush',
   description: 'Learn about RxRush - India\'s fastest online medicine delivery service with 30-minute delivery, 24/7 support, and up to 20% off on healthcare products.',
 };
 
-export default function AboutPage() {
+const AboutPage: NextPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -164,4 +165,6 @@ export default function AboutPage() {
       </section>
     </div>
   );
-} 
+};
+
+export default AboutPage; 
