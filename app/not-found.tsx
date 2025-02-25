@@ -1,6 +1,7 @@
+import React from 'react'
 import Link from 'next/link'
 
-export default function NotFound() {
+export default function NotFound(): React.JSX.Element {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">

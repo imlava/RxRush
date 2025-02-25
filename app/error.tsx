@@ -1,11 +1,15 @@
 'use client'
 
-import { useEffect } from 'react'
+import React from 'react'
 import Link from 'next/link'
-import type { ErrorProps } from 'next/error'
 
-export default function Error({ error, reset }: ErrorProps) {
-  useEffect(() => {
+interface ErrorPageProps {
+  error: Error
+  reset: () => void
+}
+
+export default function Error({ error, reset }: ErrorPageProps) {
+  React.useEffect(() => {
     console.error(error)
   }, [error])
 
