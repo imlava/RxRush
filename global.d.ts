@@ -14,5 +14,15 @@ declare global {
     }
     interface IntrinsicAttributes extends React.Attributes {}
     interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> {}
+    
+    // Add intrinsic elements
+    interface IntrinsicElements {
+      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+      h1: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>
+      p: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>
+      button: React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
+      a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>
+      // Add any other HTML elements you're using
+    }
   }
 } 

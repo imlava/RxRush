@@ -1,12 +1,19 @@
-name = "Med"
-compatibility_date = "2024-11-11"
-compatibility_flags = ["nodejs_compat"]
+# Configuration for Cloudflare Pages
+name = "rxrush"
+compatibility_date = "2023-12-01"
 
+# Configure build output directory
 [build]
 command = "npm run build"
 
-[build.environment]
-NODE_VERSION = "20.9.0"
+[build.upload]
+format = "directory"
 
+# Specify the output directory for Pages
 [site]
-bucket = "out"
+bucket = ".vercel/output/static"
+pages_build_output_dir = ".vercel/output/static"
+
+# Additional environment variables
+[env.production]
+NODE_VERSION = "18.18.0"

@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 export default function Error({
   error,
   reset,
@@ -7,6 +9,11 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  // Log the error to an error reporting service
+  useEffect(() => {
+    console.error('Error occurred:', error.message || 'Unknown error')
+  }, [error])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
