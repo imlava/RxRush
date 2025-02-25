@@ -7,7 +7,10 @@
 module.exports = {
   // Use the app directory features but disable error pages
   experimental: {
-    appDir: true,
+    // appDir is no longer experimental in Next.js 14
+    optimizePackageImports: ['react', 'react-dom'],
+    serverComponentsExternalPackages: [],
+    disableOptimizedLoading: true,
   },
   
   // Skip static generation of error pages completely
@@ -31,12 +34,6 @@ module.exports = {
   },
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  
-  // This is a critical setting - completely remove error pages from static generation
-  experimental: {
-    skipTrailingSlashRedirect: true,
-    skipMiddlewareUrlNormalize: true,
   },
   
   // Override the generated error pages with our static HTML versions

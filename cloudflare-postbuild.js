@@ -13,6 +13,8 @@ console.log('🔍 Running post-build steps for Cloudflare Pages...');
 const staticDir = path.join(__dirname, '.vercel/output/static');
 const publicDir = path.join(__dirname, 'public');
 const backupDir = path.join(__dirname, '.backup');
+const appDir = path.join(__dirname, 'app');
+const pagesDir = path.join(__dirname, 'pages');
 
 // Ensure static directory exists
 if (!fs.existsSync(staticDir)) {
@@ -57,7 +59,7 @@ console.log('🔄 Restoring original app files...');
 if (fs.existsSync(path.join(backupDir, 'error.tsx.bak'))) {
   fs.copyFileSync(
     path.join(backupDir, 'error.tsx.bak'),
-    path.join(__dirname, 'app', 'error.tsx')
+    path.join(appDir, 'error.tsx')
   );
   console.log('✅ Restored error.tsx');
 }
@@ -66,9 +68,30 @@ if (fs.existsSync(path.join(backupDir, 'error.tsx.bak'))) {
 if (fs.existsSync(path.join(backupDir, 'not-found.tsx.bak'))) {
   fs.copyFileSync(
     path.join(backupDir, 'not-found.tsx.bak'),
-    path.join(__dirname, 'app', 'not-found.tsx')
+    path.join(appDir, 'not-found.tsx')
   );
   console.log('✅ Restored not-found.tsx');
+}
+
+// Remove global-error.tsx
+const globalErrorPath = path.join(appDir, 'global-error.tsx');
+if (fs.existsSync(globalErrorPath)) {
+  fs.unlinkSync(globalErrorPath);
+  console.log('✅ Removed temporary global-error.tsx');
+}
+
+// Remove temporary pages in pages directory
+const pagesErrorPath = path.join(pagesDir, '_error.js');
+const pages404Path = path.join(pagesDir, '404.js');
+
+if (fs.existsSync(pagesErrorPath)) {
+  fs.unlinkSync(pagesErrorPath);
+  console.log('✅ Removed temporary _error.js');
+}
+
+if (fs.existsSync(pages404Path)) {
+  fs.unlinkSync(pages404Path);
+  console.log('✅ Removed temporary 404.js');
 }
 
 // Restore next.config.js

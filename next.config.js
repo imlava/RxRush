@@ -25,9 +25,11 @@ const nextConfig = {
   },
   // Skip generating error pages for static export
   experimental: {
-    // This prevents Next.js from generating certain error pages
-    skipTrailingSlashRedirect: true,
-    skipMiddlewareUrlNormalize: true,
+    // Use modern options compatible with Next.js 14
+    optimizePackageImports: ['react', 'react-dom'],
+    serverComponentsExternalPackages: [],
+    // Disable features known to cause issues with error pages
+    disableOptimizedLoading: true,
   },
 };
 
