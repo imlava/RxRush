@@ -5,18 +5,6 @@ export const metadata = {
   description: 'Learn about RxRush - India\'s fastest online medicine delivery service with 30-minute delivery, 24/7 support, and up to 20% off on healthcare products.',
 };
 
-// Add loading state for better UX
-export function Loading() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-        <p className="mt-4 text-gray-600">Loading about page...</p>
-      </div>
-    </div>
-  );
-}
-
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
