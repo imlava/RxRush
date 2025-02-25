@@ -1,9 +1,10 @@
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '@/styles/globals.css'
-import { Toaster } from 'react-hot-toast'
-import { CartProvider } from '@/app/contexts/CartContext'
 import { AuthProvider } from '@/app/contexts/AuthContext'
 import Header from '@/components/Header'
+import ScrollToTop from '@/components/ScrollToTop'
+import { Providers } from './providers'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -12,9 +13,9 @@ const inter = Inter({
   fallback: ['system-ui', 'arial']
 })
 
-export const metadata = {
-  title: 'Med - 15-minute medicine delivery',
-  description: 'Get your medicines delivered in 15 minutes',
+export const metadata: Metadata = {
+  title: 'RxRush - Online Pharmacy',
+  description: 'Your trusted online pharmacy for all your medical needs',
 }
 
 export default function RootLayout({
@@ -25,36 +26,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body>
-        <AuthProvider>
-          <CartProvider>
-            <div className="min-h-screen bg-gray-100">
+        <Providers>
+          <AuthProvider>
+            <div className="min-h-screen bg-gray-100 pt-16">
               <Header />
-              <Toaster 
-                position="top-right"
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: '#fff',
-                    color: '#333',
-                  },
-                  success: {
-                    style: {
-                      border: '1px solid #22c55e',
-                      padding: '16px',
-                    },
-                  },
-                  error: {
-                    style: {
-                      border: '1px solid #ef4444',
-                      padding: '16px',
-                    },
-                  },
-                }}
-              />
-              {children}
+              <main className="container mx-auto px-4 py-8">
+                {children}
+              </main>
+              <ScrollToTop />
             </div>
-          </CartProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   )

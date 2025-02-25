@@ -1,51 +1,114 @@
 'use client'
 
 import Link from 'next/link'
-import { Package, Pill, ShoppingCart, User } from 'lucide-react'
-import { useAuth } from '@/app/contexts/AuthContext'
+import { usePathname } from 'next/navigation'
+import { 
+  Home,
+  Search,
+  ShoppingCart,
+  Menu,
+  X,
+  User
+} from 'lucide-react'
+import { useState } from 'react'
 import { useCart } from '@/app/contexts/CartContext'
-import { Button } from '@/components/ui/button'
+
+const navigation = [
+  { name: 'Home', href: '/', icon: Home },
+  { name: 'Products', href: '/products', icon: Search },
+  { name: 'Cart', href: '/cart', icon: ShoppingCart },
+  { name: 'Account', href: '/account', icon: User },
+]
 
 export default function Header() {
-  const { user, logout } = useAuth()
-  const { cartItems, getCartItemsCount } = useCart()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const { itemCount } = useCart()
 
-  const cartCount = getCartItemsCount()
+  const isActive = (path: string) => pathname === path
 
   return (
-    <header className="bg-green-500 text-white px-4 py-3 flex items-center justify-between">
-      <Link href="/" className="text-xl font-bold flex items-center gap-2">
-        <span>RxRush</span>
-        <Pill className="h-6 w-6" />
-        <Package className="h-6 w-6" />
-      </Link>
-      <div className="flex items-center gap-4">
-        {user ? (
-          <>
-            <span className="text-sm">Welcome, {user.name}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={logout}
-              className="text-white hover:text-green-500"
+    <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center">
+              <span className="text-2xl font-bold text-green-600">RxRush</span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium relative ${
+                    isActive(item.href)
+                      ? 'text-green-600'
+                      : 'text-gray-600 hover:text-green-600'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                  {item.name === 'Cart' && itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="flex md:hidden">
+            <button
+              type="button"
+              className="text-gray-600 hover:text-green-600"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              Logout
-            </Button>
-          </>
-        ) : (
-          <Link href="/login">
-            <User className="w-6 h-6" />
-          </Link>
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-2 space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium relative ${
+                    isActive(item.href)
+                      ? 'text-green-600 bg-green-50'
+                      : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                  {item.name === 'Cart' && itemCount > 0 && (
+                    <span className="absolute right-3 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
         )}
-        <Link href="/cart" className="relative">
-          <ShoppingCart className="w-6 h-6" />
-          {cartCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-white text-green-500 rounded-full w-4 h-4 text-xs flex items-center justify-center">
-              {cartCount}
-            </span>
-          )}
-        </Link>
-      </div>
+      </nav>
     </header>
   )
 }

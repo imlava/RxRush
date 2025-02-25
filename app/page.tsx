@@ -1,173 +1,179 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Search, X, Filter, ChevronDown } from 'lucide-react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useApi } from '@/hooks/useApi'
-import { useCart } from '@/app/contexts/CartContext'
+import { Search, ArrowRight, ShieldCheck, Truck, Clock, CreditCard } from 'lucide-react'
 
-interface Medicine {
-  id: string
-  name: string
-  dosage: string
-  price: number
-  originalPrice: number
-  discount: string
-}
+const features = [
+  {
+    title: 'Genuine Medicines',
+    description: 'All medicines are sourced directly from authorized manufacturers',
+    icon: ShieldCheck,
+    color: 'bg-blue-50 text-blue-600'
+  },
+  {
+    title: 'Fast Delivery',
+    description: 'Get your medicines delivered within 30 Minutes',
+    icon: Truck,
+    color: 'bg-green-50 text-green-600'
+  },
+  {
+    title: '24/7 Support',
+    description: 'Our customer support team is available round the clock',
+    icon: Clock,
+    color: 'bg-purple-50 text-purple-600'
+  },
+  {
+    title: 'Secure Payments',
+    description: 'Multiple secure payment options available',
+    icon: CreditCard,
+    color: 'bg-orange-50 text-orange-600'
+  }
+]
 
-export default function Home() {
-  const { data: medicines, loading, error } = useApi<Medicine[]>('/api/medicines')
+export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
+  const router = useRouter()
 
-  // Save medicines to localStorage for offline access
-  useEffect(() => {
-    if (medicines && medicines.length > 0) {
-      localStorage.setItem('medicines', JSON.stringify(medicines))
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchTerm)}`)
     }
-  }, [medicines])
-
-  // Filters
-  const filteredMedicines = medicines?.filter(medicine => 
-    medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    medicine.price >= priceRange[0] && 
-    medicine.price <= priceRange[1]
-  ) || []
-
-  // For skeleton loading
-  const skeletonCards = Array(6).fill(0).map((_, i) => (
-    <Card key={`skeleton-${i}`} className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-      </CardHeader>
-      <CardContent>
-        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2 animate-pulse"></div>
-        <div className="flex items-center gap-2">
-          <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
-          <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
-        </div>
-      </CardContent>
-    </Card>
-  ))
+  }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-center mb-8">
-        Medicines at your doorstep under 15 minutes! <span className="hidden sm:inline" role="img" aria-label="alarm clock">⏰</span>
-      </h1>
-
-      <div className="max-w-2xl mx-auto mb-8">
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search for a medicine..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-10"
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-between items-center">
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-1 text-gray-600 text-sm hover:text-green-600"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-            <ChevronDown className={`h-3 w-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {filteredMedicines.length > 0 && (
-            <span className="text-sm text-gray-500">
-              {filteredMedicines.length} medicine{filteredMedicines.length !== 1 ? 's' : ''} found
-            </span>
-          )}
-        </div>
-
-        {showFilters && (
-          <div className="mt-4 p-4 bg-white rounded-lg shadow-sm border">
-            <h3 className="font-medium mb-3">Price Range</h3>
-            <div className="flex items-center gap-4">
-              <Input
-                type="number"
-                min="0"
-                max={priceRange[1]}
-                value={priceRange[0]}
-                onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                className="w-24"
-              />
-              <span>to</span>
-              <Input
-                type="number"
-                min={priceRange[0]}
-                value={priceRange[1]}
-                onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 0])}
-                className="w-24"
+    <div className="space-y-20 pb-20">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-b from-green-50 to-white">
+        <div className="container mx-auto px-4 py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
+                Your Health, <br />
+                <span className="text-green-600">Our Priority</span>
+              </h1>
+              <p className="text-lg text-gray-600 max-w-lg">
+                RxRush brings you a wide range of medicines and healthcare products, 
+                delivered right to your doorstep with just a few clicks.
+              </p>
+              <form onSubmit={handleSearch} className="relative max-w-lg">
+                <input
+                  type="text"
+                  placeholder="Search for medicines..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                >
+                  Search
+                </button>
+              </form>
+            </div>
+            <div className="relative h-[400px] lg:h-[500px]">
+              <Image
+                src="https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?q=80&w=2940&auto=format&fit=crop"
+                alt="Healthcare professionals"
+                fill
+                className="object-cover rounded-2xl shadow-xl"
               />
             </div>
           </div>
-        )}
-      </div>
-
-      {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {skeletonCards}
         </div>
-      )}
+      </section>
 
-      {error && (
-        <div className="text-center text-red-500">
-          <p>Error loading medicines. Please try again later.</p>
+      {/* Features Section */}
+      <section className="container mx-auto px-4">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Why Choose RxRush?
+          </h2>
+          <p className="text-gray-600">
+            We're committed to providing you with the best healthcare experience possible
+          </p>
         </div>
-      )}
-
-      {!loading && !error && filteredMedicines.length === 0 && (
-        <div className="text-center text-gray-500">
-          <p>No medicines found matching your search.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature) => {
+            const Icon = feature.icon
+            return (
+              <div key={feature.title} className="bg-white rounded-xl p-6 shadow-sm">
+                <div className={`inline-block p-3 rounded-lg ${feature.color} mb-4`}>
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">
+                  {feature.description}
+                </p>
+              </div>
+            )
+          })}
         </div>
-      )}
+      </section>
 
-      {!loading && !error && filteredMedicines.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMedicines.map((medicine) => (
-            <Link href={`/medicine/${medicine.id}`} key={medicine.id}>
-              <Card className="hover:shadow-lg transition-shadow h-full">
-                <CardHeader>
-                  <CardTitle>{medicine.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-2">{medicine.dosage}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">₹{medicine.price}</span>
-                    <span className="text-sm text-gray-500 line-through">₹{medicine.originalPrice}</span>
-                    <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">{medicine.discount}</span>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* About Section */}
+      <section className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="relative h-[400px]">
+            <Image
+              src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=2940&auto=format&fit=crop"
+              alt="Our pharmacy"
+              fill
+              className="object-cover rounded-2xl shadow-xl"
+            />
+          </div>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-gray-900">
+              About RxRush
+            </h2>
+            <p className="text-gray-600">
+              RxRush is a leading online pharmacy in India, committed to making healthcare 
+              accessible to everyone. With our extensive network of licensed pharmacies and 
+              healthcare professionals, we ensure that you get genuine medicines at the best prices.
+            </p>
+            <p className="text-gray-600">
+              Our mission is to revolutionize the way people access healthcare products by 
+              providing a seamless online experience, backed by expert support and reliable delivery.
+            </p>
+            <div className="pt-4">
+              <Link 
+                href="/about"
+                className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium"
+              >
+                Learn more about us
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-green-600">
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center text-white max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to experience better healthcare?
+            </h2>
+            <p className="text-green-50 mb-8">
+              Join thousands of satisfied customers who trust RxRush for their healthcare needs
+            </p>
+            <Link
+              href="/products"
+              className="inline-block bg-white text-green-600 px-8 py-3 rounded-lg font-medium hover:bg-green-50"
+            >
+              Browse Products
             </Link>
-          ))}
+          </div>
         </div>
-      )}
-
-      <footer className="bg-gray-50 py-6 mt-16 border-t">
-        <div className="container mx-auto px-4 text-center text-gray-600 text-sm">
-          <p>© 2024 RxRush. All medicines are delivered within 15 minutes or your money back.</p>
-          <p className="mt-2">Contact: support@RxRush.com | Emergency: +91 9876543210</p>
-        </div>
-      </footer>
-    </main>
+      </section>
+    </div>
   )
 }

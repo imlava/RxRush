@@ -66,6 +66,22 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Check if the request is for an admin route
+  if (pathname.startsWith('/admin')) {
+    // Skip authentication for the login page
+    if (pathname === '/admin/auth') {
+      return NextResponse.next()
+    }
+
+    // Check if user is authenticated
+    const isAuthenticated = request.cookies.get('adminAuthenticated')?.value === 'true'
+    
+    if (!isAuthenticated) {
+      // Redirect to login page if not authenticated
+      return NextResponse.redirect(new URL('/admin/auth', request.url))
+    }
+  }
+
   // Continue to the API route
   return NextResponse.next()
 }

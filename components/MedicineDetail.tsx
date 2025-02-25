@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,29 +20,36 @@ interface Medicine {
   description: string
 }
 
+interface CartItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+  image?: string
+}
+
 interface MedicineDetailProps {
   id: string
 }
 
 export default function MedicineDetail({ id }: MedicineDetailProps) {
   const router = useRouter()
-  const { addToCart, cartItems } = useCart()
+  const { addItem, items = [] } = useCart()
   const { data: medicine, loading, error } = useApi<Medicine>(`/api/medicines?id=${id}`)
   const [isAdding, setIsAdding] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
   
   // Check if the medicine is already in the cart
-  const isInCart = cartItems.some(item => item.id === id)
-  const itemInCart = cartItems.find(item => item.id === id)
+  const isInCart = items?.some((item: CartItem) => item.id === id) || false
+  const itemInCart = items?.find((item: CartItem) => item.id === id)
 
   const handleAddToCart = () => {
     if (medicine) {
       setIsAdding(true)
       try {
-        addToCart({
+        addItem({
           id: medicine.id,
           name: medicine.name,
-          dosage: medicine.dosage,
           price: medicine.price,
           quantity: 1
         })
@@ -82,7 +89,7 @@ export default function MedicineDetail({ id }: MedicineDetailProps) {
 
   if (error) {
     return (
-      <Alert variant="destructive" className="mb-4">
+      <Alert className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
@@ -126,7 +133,7 @@ export default function MedicineDetail({ id }: MedicineDetailProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Clock className="h-4 w-4" />
-              <span>Delivery in 15 minutes</span>
+              <span>Delivery in 30 minutes</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <TruckIcon className="h-4 w-4" />
@@ -144,7 +151,7 @@ export default function MedicineDetail({ id }: MedicineDetailProps) {
                 className="w-full" 
                 onClick={navigateToCart}
               >
-                View in Cart ({itemInCart?.quantity})
+                View in Cart ({itemInCart?.quantity || 0})
               </Button>
             ) : (
               <Button 

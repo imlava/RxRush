@@ -11,7 +11,7 @@ export async function GET(
     id,
     status: 'Out for Delivery',
     createdAt: new Date().toISOString(),
-    estimatedDelivery: new Date(Date.now() + 15 * 60000).toISOString(), // 15 minutes from now
+    estimatedDelivery: new Date(Date.now() + 30 * 60000).toISOString(), // 30 minutes from now
   };
 
   return NextResponse.json(order);
