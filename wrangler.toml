@@ -1,6 +1,6 @@
 # Configuration for Cloudflare Pages
 name = "rxrush"
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-02-25"
 
 # Configure build output directory
 [build]
@@ -11,8 +11,8 @@ format = "directory"
 
 # Specify the output directory for Pages
 [site]
-bucket = ".vercel/output/static"
-pages_build_output_dir = ".vercel/output/static"
+bucket = ".next/standalone"
+pages_build_output_dir = ".next/standalone"
 
 # Additional environment variables
 [env.production]
