@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default function Error({
   error,
@@ -15,20 +15,25 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center space-y-6">
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="text-center space-y-4">
         <h1 className="text-6xl font-bold text-gray-900">500</h1>
-        <h2 className="text-2xl font-semibold text-gray-600">Something went wrong!</h2>
-        <p className="text-gray-500 max-w-md">
-          An error occurred while processing your request. Our team has been notified and is working on it.
-        </p>
+        <p className="text-xl text-gray-600">Something went wrong</p>
         <div className="space-x-4">
-          <Button onClick={reset}>Try again</Button>
-          <Button variant="outline" asChild>
-            <a href="/">Return Home</a>
-          </Button>
+          <button
+            onClick={() => reset()}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+          >
+            Try again
+          </button>
+          <Link
+            href="/"
+            className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Go home
+          </Link>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
