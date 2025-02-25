@@ -8,7 +8,13 @@ const nextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
+  swcMinify: false,
+  experimental: {
+    appDir: true,
+    fontLoaders: [
+      { loader: '@next/font/google', options: { subsets: ['latin'] } },
+    ],
+  },
   // Add rewrites to handle API routes properly
   async rewrites() {
     return [
