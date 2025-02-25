@@ -3,13 +3,16 @@ import { RuntimeConfig } from '@/config/runtime-config'
 
 export async function generateStaticParams() {
   try {
-    const response = await fetch(`${RuntimeConfig.apiBaseUrl}/api/medicines`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch medicines')
-    }
-    const medicines = await response.json()
+    // Use mock data from medicineService instead of API call during build
+    const medicines = [
+      { id: '1' },
+      { id: '2' },
+      { id: '3' },
+      { id: '4' },
+      { id: '5' }
+    ]
 
-    return medicines.map((medicine: { id: string }) => ({
+    return medicines.map((medicine) => ({
       id: medicine.id,
     }))
   } catch (error) {

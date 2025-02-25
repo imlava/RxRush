@@ -11,13 +11,14 @@ const medicines = [
   { id: '8', name: 'Metformin', dosage: '500mg', price: 100, originalPrice: 120, discount: '16.7% off', description: 'Oral diabetes medication' },
 ]
 
+export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate the data at most every hour
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-    const query = searchParams.get('query')?.toLowerCase()
+    const url = new URL(request.url)
+    const id = url.searchParams.get('id')
+    const query = url.searchParams.get('query')?.toLowerCase()
 
     let result = [...medicines]
 
@@ -25,11 +26,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const medicine = medicines.find(m => m.id === id)
       if (medicine) {
-        return NextResponse.json(medicine, {
-          headers: {
-            'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-          },
-        })
+        return NextResponse.json(medicine)
       } else {
         return NextResponse.json({ error: 'Medicine not found' }, { status: 404 })
       }
@@ -43,11 +40,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(result, {
-      headers: {
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-      },
-    })
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error in medicines API:', error)
     return NextResponse.json(
