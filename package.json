@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "node -e \"console.log('Preparing build environment...')\"",
     "build": "next build",
+    "build:cloudflare": "node cloudflare-build.js",
     "start": "next start",
     "lint": "next lint",
     "test:build": "node test-build.js"

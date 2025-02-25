@@ -14,6 +14,14 @@ const nextConfig = {
     // Ignore TypeScript errors during build
     ignoreBuildErrors: true,
   },
+  // Explicitly disable static generation for error pages
+  exportPathMap: async function (defaultPathMap) {
+    // Filter out error pages from static generation
+    const filteredMap = { ...defaultPathMap };
+    delete filteredMap['/404'];
+    delete filteredMap['/500'];
+    return filteredMap;
+  },
   // Add rewrites to handle API routes properly
   async rewrites() {
     return [
