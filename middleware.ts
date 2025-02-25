@@ -36,7 +36,8 @@ function setCachedData(key: string, data: any) {
   cache.set(key, { data, timestamp: Date.now() })
 }
 
-export async function middleware(request: NextRequest) {
+// Middleware function
+export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
   // Only intercept API routes
@@ -85,3 +86,11 @@ export async function middleware(request: NextRequest) {
   // Continue to the API route
   return NextResponse.next()
 }
+
+// Configure which paths this middleware should run on
+export const config = {
+  matcher: [
+    // Apply to all paths except static files, api routes, etc.
+    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
+  ],
+};
