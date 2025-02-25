@@ -78,8 +78,8 @@ export default function HomePage() {
             </div>
             <div className="relative h-[400px] lg:h-[500px]">
               <Image
-                src="https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?q=80&w=2940&auto=format&fit=crop"
-                alt="Healthcare professionals"
+                src="https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2940&auto=format&fit=crop"
+                alt="Medicines and healthcare"
                 fill
                 className="object-cover rounded-2xl shadow-xl"
               />
