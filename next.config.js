@@ -5,8 +5,8 @@ const nextConfig = {
 
   images: {
     domains: ['placehold.co', 'images.unsplash.com'],
-    // Add Vercel's image optimization
-    unoptimized: process.env.NODE_ENV === 'development',
+    // Remove the unoptimized flag to ensure proper image optimization on the server
+    // unoptimized: process.env.NODE_ENV === 'development',
   },
 
   env: {
@@ -41,7 +41,7 @@ const nextConfig = {
     // Add aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': '/',
+      '@': '.',
     };
     
     return config;
