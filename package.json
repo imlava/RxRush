@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^1.6.0",
     "@headlessui/react": "^2.2.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -44,8 +43,7 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.56.0",
-    "eslint-config-next": "^14.2.24",
-    "prisma": "^5.22.0"
+    "eslint-config-next": "^14.2.24"
   },
   "engines": {
     "node": ">=18.17.0"

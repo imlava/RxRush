@@ -4,6 +4,16 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
+interface ExtendedSession {
+  user?: {
+    name?: string | null
+    email?: string | null
+    image?: string | null
+    role?: string
+    id?: string
+  }
+}
+
 export default function ProtectedRoute({
   children,
   requireAdmin = false,
@@ -11,7 +21,7 @@ export default function ProtectedRoute({
   children: React.ReactNode
   requireAdmin?: boolean
 }) {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession() as { data: ExtendedSession | null, status: string }
   const router = useRouter()
 
   useEffect(() => {
@@ -19,7 +29,7 @@ export default function ProtectedRoute({
 
     if (!session) {
       router.push('/login')
-    } else if (requireAdmin && session.user.role !== 'admin') {
+    } else if (requireAdmin && session.user?.role !== 'admin') {
       router.push('/')
     }
   }, [session, status, requireAdmin, router])
@@ -28,7 +38,7 @@ export default function ProtectedRoute({
     return <div>Loading...</div>
   }
 
-  if (!session || (requireAdmin && session.user.role !== 'admin')) {
+  if (!session || (requireAdmin && session.user?.role !== 'admin')) {
     return null
   }
 

@@ -1,19 +1,20 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { compare } from 'bcryptjs'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { PrismaClient } from '@prisma/client'
+import { compare, hash } from 'bcryptjs'
 
-const prisma = new PrismaClient()
+// Admin user (you should move this to a secure configuration)
+const ADMIN_USER = {
+  id: '1',
+  email: 'admin@rxrush.com',
+  name: 'Admin',
+  role: 'admin',
+  password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of your admin password
+}
 
-const MAX_LOGIN_ATTEMPTS = 5
-const LOCKOUT_TIME = 15 * 60 * 1000 // 15 minutes
-
-export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      name: 'Credentials',
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -23,55 +24,26 @@ export const authOptions = {
           throw new Error('Invalid credentials')
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        })
-
-        if (!user) {
-          throw new Error('User not found')
-        }
-
-        // Check for account lockout
-        if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS && 
-            user.lastLoginAttempt && 
-            Date.now() - new Date(user.lastLoginAttempt).getTime() < LOCKOUT_TIME) {
-          throw new Error('Account locked. Try again later.')
-        }
-
-        const isValid = await compare(credentials.password, user.password)
-
-        if (!isValid) {
-          // Increment login attempts
-          await prisma.user.update({
-            where: { email: credentials.email },
-            data: {
-              loginAttempts: { increment: 1 },
-              lastLoginAttempt: new Date()
+        // Check if it's the admin user
+        if (credentials.email === ADMIN_USER.email) {
+          const isValid = await compare(credentials.password, ADMIN_USER.password)
+          
+          if (isValid) {
+            return {
+              id: ADMIN_USER.id,
+              email: ADMIN_USER.email,
+              name: ADMIN_USER.name,
+              role: ADMIN_USER.role
             }
-          })
-          throw new Error('Invalid password')
-        }
-
-        // Reset login attempts on successful login
-        await prisma.user.update({
-          where: { email: credentials.email },
-          data: {
-            loginAttempts: 0,
-            lastLoginAttempt: null
           }
-        })
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role
         }
+
+        throw new Error('Invalid credentials')
       }
     })
   ],
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
@@ -84,8 +56,8 @@ export const authOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role
-        session.user.id = token.id
+        (session.user as any).role = token.role
+        ;(session.user as any).id = token.id
       }
       return session
     }
@@ -95,7 +67,6 @@ export const authOptions = {
     error: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+})
 
-const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST } 

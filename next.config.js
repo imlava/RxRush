@@ -37,9 +37,9 @@ const nextConfig = {
   // async headers() { ... }
 
   // Ensure server-side rendering is enabled
-  experimental: {
-    appDir: true,
-  },
+  // experimental: {
+  //   appDir: true,
+  // },
 
   // Explicitly set webpack config to help resolve modules
   webpack: (config) => {
