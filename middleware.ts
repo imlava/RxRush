@@ -1,6 +1,7 @@
 // middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
 // Define allowed API routes
 const DYNAMIC_ROUTES = [
@@ -36,28 +37,102 @@ function setCachedData(key: string, data: any) {
   cache.set(key, { data, timestamp: Date.now() })
 }
 
+// Rate limiting map for brute force protection
+const rateLimit = new Map()
+
+// Configure paths that require authentication
+const PROTECTED_PATHS = [
+  '/admin',
+  '/admin/inventory',
+  '/admin/orders',
+  '/admin/customers',
+  '/admin/users',
+  '/admin/settings',
+  '/api/admin'
+]
+
+// Configure rate limiting
+const RATE_LIMIT = {
+  window: 60 * 1000, // 1 minute
+  max: 50 // maximum requests per window
+}
+
 // Middleware function
-export function middleware(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+  const path = request.nextUrl.pathname
+
+  // Add security headers
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+  )
+
+  // Rate limiting
+  const ip = request.ip ?? 'anonymous'
+  const rateLimitKey = `${ip}:${path}`
+  const now = Date.now()
+
+  // Clean up old rate limit entries
+  for (const [key, data] of rateLimit.entries()) {
+    if (now - data.timestamp > RATE_LIMIT.window) {
+      rateLimit.delete(key)
+    }
+  }
+
+  // Check rate limit
+  const rateLimitData = rateLimit.get(rateLimitKey) ?? { count: 0, timestamp: now }
+  if (now - rateLimitData.timestamp > RATE_LIMIT.window) {
+    rateLimitData.count = 0
+    rateLimitData.timestamp = now
+  }
+  rateLimitData.count++
+  rateLimit.set(rateLimitKey, rateLimitData)
+
+  if (rateLimitData.count > RATE_LIMIT.max) {
+    return new NextResponse('Too Many Requests', { status: 429 })
+  }
+
+  // Check protected paths
+  if (PROTECTED_PATHS.some(prefix => path.startsWith(prefix))) {
+    try {
+      const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+
+      if (!token) {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+
+      // Check admin role for admin paths
+      if (path.startsWith('/admin') && token.role !== 'admin') {
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+    } catch (error) {
+      console.error('Auth error:', error)
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
 
   // Only intercept API routes
-  if (!pathname.startsWith('/api/')) {
-    return NextResponse.next()
+  if (!path.startsWith('/api/')) {
+    return response
   }
 
   // Skip middleware for auth routes to prevent caching
-  if (pathname.startsWith('/api/auth')) {
-    return NextResponse.next()
+  if (path.startsWith('/api/auth')) {
+    return response
   }
 
   // Validate route access for non-auth routes
-  if (!isRouteAllowed(pathname)) {
+  if (!isRouteAllowed(path)) {
     return NextResponse.json({ error: 'Route not found' }, { status: 404 })
   }
 
   const method = request.method as HTTPMethod
-  const queryParams = Object.fromEntries(searchParams.entries())
-  const cacheKey = `${method}:${pathname}:${JSON.stringify(queryParams)}`
+  const queryParams = Object.fromEntries(request.nextUrl.searchParams.entries())
+  const cacheKey = `${method}:${path}:${JSON.stringify(queryParams)}`
 
   // Check cache for GET requests
   if (method === 'GET') {
@@ -68,10 +143,10 @@ export function middleware(request: NextRequest) {
   }
 
   // Check if the request is for an admin route
-  if (pathname.startsWith('/admin')) {
+  if (path.startsWith('/admin')) {
     // Skip authentication for the login page
-    if (pathname === '/admin/auth') {
-      return NextResponse.next()
+    if (path === '/admin/auth') {
+      return response
     }
 
     // Check if user is authenticated
@@ -84,12 +159,17 @@ export function middleware(request: NextRequest) {
   }
 
   // Continue to the API route
-  return NextResponse.next()
+  return response
 }
 
 // Configure which paths this middleware should run on
 export const config = {
   matcher: [
+    '/admin/:path*',
+    '/api/admin/:path*',
+    '/account/:path*',
+    '/login',
+    '/api/auth/:path*',
     // Apply to all paths except static files, api routes, etc.
     '/((?!_next/static|_next/image|favicon.ico|api/).*)',
   ],
