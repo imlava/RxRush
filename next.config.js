@@ -5,7 +5,7 @@ const nextConfig = {
 
   // Enable proper image optimization
   images: {
-    domains: ['placehold.co'],
+    domains: ['placehold.co', 'images.unsplash.com'],
     // Don't use unoptimized: true unless absolutely necessary
   },
 
