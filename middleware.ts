@@ -37,13 +37,14 @@ function setCachedData(key: string, data: any) {
   cache.set(key, { data, timestamp: Date.now() })
 }
 
-// Rate limiting map for brute force protection
-const rateLimit = new Map()
-
 // Configure paths that require authentication
 const PROTECTED_PATHS = ['/admin', '/account']
 const ADMIN_PATHS = ['/admin']
 const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth']
+const STATIC_PATHS = ['/_next', '/favicon.ico', '/images']
+
+// Rate limiting map for brute force protection
+const rateLimit = new Map()
 
 // Configure rate limiting
 const RATE_LIMIT = {
@@ -65,8 +66,9 @@ export async function middleware(request: NextRequest) {
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
   )
 
-  // Skip middleware for public paths and static files
+  // Skip middleware for public and static paths
   if (PUBLIC_PATHS.some(p => path.startsWith(p)) || 
+      STATIC_PATHS.some(p => path.startsWith(p)) ||
       path.match(/\.(ico|png|jpg|jpeg|gif|svg|css|js)$/)) {
     return response
   }
@@ -97,19 +99,23 @@ export async function middleware(request: NextRequest) {
   }
 
   // Get the token
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+  const token = await getToken({ 
+    req: request, 
+    secret: process.env.NEXTAUTH_SECRET 
+  })
 
   // Check protected paths
   if (PROTECTED_PATHS.some(prefix => path.startsWith(prefix))) {
     if (!token) {
       const url = new URL('/login', request.url)
-      url.searchParams.set('callbackUrl', path)
+      url.searchParams.set('callbackUrl', request.url)
       return NextResponse.redirect(url)
     }
 
     // Check admin paths
     if (ADMIN_PATHS.some(prefix => path.startsWith(prefix))) {
       if (token.role !== 'admin') {
+        console.log('Non-admin access attempt:', path, 'by user role:', token.role)
         return NextResponse.redirect(new URL('/', request.url))
       }
     }

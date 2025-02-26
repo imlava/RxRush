@@ -34,14 +34,16 @@ const USERS = {
     email: 'admin@rxrush.com',
     name: 'Admin',
     role: 'admin',
-    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of 'admin123'
+    // This is the hashed version of 'admin123'
+    password: '$2a$12$rQDKqGq3.dUwvZd0vEPHPOGwU0Bp7E.bKvwIds6hWEPD5ZQD0Ydw2'
   },
   user: {
     id: '2',
     email: 'user@rxrush.com',
     name: 'Test User',
     role: 'user',
-    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of 'user123'
+    // This is the hashed version of 'user123'
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy'
   }
 }
 
@@ -62,12 +64,14 @@ const options: NextAuthOptions = {
         const user = Object.values(USERS).find(u => u.email === credentials.email)
         
         if (!user) {
+          console.log('User not found:', credentials.email)
           return null
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password)
         
         if (isValid) {
+          console.log('Login successful for:', user.email, 'with role:', user.role)
           return {
             id: user.id,
             email: user.email,
@@ -76,6 +80,7 @@ const options: NextAuthOptions = {
           }
         }
 
+        console.log('Invalid password for:', credentials.email)
         return null
       }
     })
@@ -96,10 +101,18 @@ const options: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
+      // Handle admin redirects
+      if (url.startsWith('/admin')) {
+        return url
+      }
+      // Allow relative URLs
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`
+      }
+      // Allow same-origin URLs
+      if (url.startsWith(baseUrl)) {
+        return url
+      }
       return baseUrl
     }
   },
