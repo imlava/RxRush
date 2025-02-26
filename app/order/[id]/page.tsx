@@ -1,24 +1,23 @@
 import OrderTracking from '@/components/OrderTracking'
 import { RuntimeConfig } from '@/config/runtime-config'
+import { orderService } from '@/services/orderService'
 
-export async function generateStaticParams() {
+// Use dynamic rendering instead of static params
+export const dynamic = 'force-dynamic'
+
+async function getOrder(id: string) {
   try {
-    const response = await fetch(`${RuntimeConfig.apiBaseUrl}/api/orders`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch orders')
-    }
-    const orders = await response.json()
-
-    return orders.map((order: { id: string }) => ({
-      id: order.id,
-    }))
+    const order = await orderService.getById(id)
+    return order
   } catch (error) {
-    console.error('Error generating static params for orders:', error)
-    return []
+    console.error('Error fetching order:', error)
+    return null
   }
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+export default async function OrderPage({ params }: { params: { id: string } }) {
+  const order = await getOrder(params.id)
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <OrderTracking id={params.id} />

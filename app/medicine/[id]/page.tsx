@@ -1,24 +1,23 @@
 import MedicineDetail from '@/components/MedicineDetail'
 import { RuntimeConfig } from '@/config/runtime-config'
+import { medicineService } from '@/services/medicineService'
 
-export async function generateStaticParams() {
+// Instead of using generateStaticParams, use dynamic rendering
+export const dynamic = 'force-dynamic'
+
+async function getMedicine(id: string) {
   try {
-    const response = await fetch(`${RuntimeConfig.apiBaseUrl}/api/medicines`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch medicines')
-    }
-    const medicines = await response.json()
-
-    return medicines.map((medicine: { id: string }) => ({
-      id: medicine.id,
-    }))
+    const medicine = await medicineService.getById(id)
+    return medicine
   } catch (error) {
-    console.error('Error generating static params:', error)
-    return []
+    console.error('Error fetching medicine:', error)
+    return null
   }
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+export default async function MedicineDetailPage({ params }: { params: { id: string } }) {
+  const medicine = await getMedicine(params.id)
+  
   return (
     <main className="container mx-auto px-4 py-8">
       <MedicineDetail id={params.id} />

@@ -36,6 +36,11 @@ const nextConfig = {
   // Vercel handles CORS automatically, so we can remove the headers config
   // async headers() { ... }
 
+  // Ensure server-side rendering is enabled
+  experimental: {
+    appDir: true,
+  },
+
   // Explicitly set webpack config to help resolve modules
   webpack: (config) => {
     // Add aliases
