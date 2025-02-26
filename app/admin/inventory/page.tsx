@@ -200,169 +200,192 @@ function InventoryContent() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 bg-white p-6 rounded-lg shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold mb-2">Inventory Management</h1>
-          <p className="text-gray-600">Manage your medicine inventory</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Inventory Management</h1>
+          <p className="text-gray-600">Manage your medicine inventory and stock levels</p>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-green-500 hover:bg-green-600">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Medicine
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 h-12 shadow-md transition-all hover:shadow-lg">
+              <Plus className="h-5 w-5 mr-2 stroke-[2.5]" />
+              Add New Medicine
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>{isEditMode ? 'Edit Medicine' : 'Add New Medicine'}</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">
+                {isEditMode ? 'Edit Medicine Details' : 'Add New Medicine'}
+              </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name" className="font-semibold">Name</Label>
                   <Input
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Medicine name"
+                    placeholder="Enter medicine name"
+                    className="h-11"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="Medicine description"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category" className="font-semibold">Category</Label>
                   <Input
                     id="category"
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    placeholder="Medicine category"
+                    placeholder="Enter category"
+                    className="h-11"
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="price">Price</Label>
-                    <Input
-                      id="price"
-                      name="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="originalPrice">Original Price</Label>
-                    <Input
-                      id="originalPrice"
-                      name="originalPrice"
-                      type="number"
-                      value={formData.originalPrice}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="stock">Stock</Label>
-                    <Input
-                      id="stock"
-                      name="stock"
-                      type="number"
-                      value={formData.stock}
-                      onChange={handleInputChange}
-                      placeholder="0"
-                      min="0"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="threshold">Threshold</Label>
-                    <Input
-                      id="threshold"
-                      name="threshold"
-                      type="number"
-                      value={formData.threshold}
-                      onChange={handleInputChange}
-                      placeholder="0"
-                      min="0"
-                      required
-                    />
-                  </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="price" className="font-semibold">Price (₹)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    placeholder="Enter price"
+                    className="h-11"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="manufacturer">Manufacturer</Label>
+                  <Label htmlFor="originalPrice" className="font-semibold">Original Price (₹)</Label>
+                  <Input
+                    id="originalPrice"
+                    name="originalPrice"
+                    type="number"
+                    value={formData.originalPrice}
+                    onChange={handleInputChange}
+                    placeholder="Enter original price"
+                    className="h-11"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="stock" className="font-semibold">Stock</Label>
+                  <Input
+                    id="stock"
+                    name="stock"
+                    type="number"
+                    value={formData.stock}
+                    onChange={handleInputChange}
+                    placeholder="Enter stock quantity"
+                    className="h-11"
+                    min="0"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="threshold" className="font-semibold">Stock Threshold</Label>
+                  <Input
+                    id="threshold"
+                    name="threshold"
+                    type="number"
+                    value={formData.threshold}
+                    onChange={handleInputChange}
+                    placeholder="Enter stock threshold"
+                    className="h-11"
+                    min="0"
+                    required
+                  />
+                </div>
+                <div className="col-span-2 grid gap-2">
+                  <Label htmlFor="description" className="font-semibold">Description</Label>
+                  <Input
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Enter medicine description"
+                    className="h-11"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="manufacturer" className="font-semibold">Manufacturer</Label>
                   <Input
                     id="manufacturer"
                     name="manufacturer"
                     value={formData.manufacturer}
                     onChange={handleInputChange}
-                    placeholder="Manufacturer name"
+                    placeholder="Enter manufacturer"
+                    className="h-11"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="expiryDate">Expiry Date</Label>
-                  <Input
-                    id="expiryDate"
-                    name="expiryDate"
-                    type="month"
-                    value={formData.expiryDate}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input
-                    id="image"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleInputChange}
-                    placeholder="Image URL"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="dosage">Dosage</Label>
+                  <Label htmlFor="dosage" className="font-semibold">Dosage</Label>
                   <Input
                     id="dosage"
                     name="dosage"
                     value={formData.dosage}
                     onChange={handleInputChange}
-                    placeholder="e.g., 500mg"
+                    placeholder="Enter dosage"
+                    className="h-11"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="expiryDate" className="font-semibold">Expiry Date</Label>
+                  <Input
+                    id="expiryDate"
+                    name="expiryDate"
+                    type="date"
+                    value={formData.expiryDate}
+                    onChange={handleInputChange}
+                    className="h-11"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="image" className="font-semibold">Image URL</Label>
+                  <Input
+                    id="image"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleInputChange}
+                    placeholder="Enter image URL"
+                    className="h-11"
+                    required
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={handleCloseDialog}>
+              <div className="flex justify-end gap-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseDialog}
+                  className="h-11 px-6"
+                >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   type="submit"
-                  className="bg-green-500 hover:bg-green-600"
                   disabled={isLoading}
+                  className="h-11 px-6 bg-green-600 hover:bg-green-700"
                 >
-                  {isLoading ? 'Saving...' : isEditMode ? 'Update' : 'Add'} Medicine
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      {isEditMode ? 'Updating...' : 'Adding...'}
+                    </span>
+                  ) : (
+                    isEditMode ? 'Update Medicine' : 'Add Medicine'
+                  )}
                 </Button>
               </div>
             </form>
