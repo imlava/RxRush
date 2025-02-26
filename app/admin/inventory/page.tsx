@@ -29,6 +29,24 @@ import { toast } from 'react-hot-toast'
 import { showToast } from '@/app/contexts/CartContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+const getAnimeMedicineImage = (medicineName: string, category: string) => {
+  // Base colors for different medicine categories
+  const categoryColors: { [key: string]: string } = {
+    'Antibiotics': 'purple',
+    'Painkillers': 'red',
+    'Vitamins': 'orange',
+    'Supplements': 'green',
+    'Antacids': 'blue',
+    'default': 'gray'
+  }
+
+  // Get color based on category or default
+  const color = categoryColors[category] || categoryColors.default
+
+  // Create a unique but consistent avatar for the medicine
+  return `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(medicineName)}&backgroundColor=${encodeURIComponent(color)}&radius=50&accessories=variant01,variant02,variant03&accessoriesProbability=100`
+}
+
 function InventoryContent() {
   const [medicines, setMedicines] = useState<Medicine[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -55,6 +73,14 @@ function InventoryContent() {
   })
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  // Add this new state for fallback images
+  const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({})
+
+  // Add this function to handle image load errors
+  const handleImageError = (medicineId: string) => {
+    setImageErrors(prev => ({ ...prev, [medicineId]: true }))
+  }
 
   useEffect(() => {
     loadMedicines()
@@ -95,14 +121,20 @@ function InventoryContent() {
     setIsLoading(true)
 
     try {
+      // Generate anime medicine bottle image if no image URL is provided
+      const submissionData = {
+        ...formData,
+        image: formData.image || getAnimeMedicineImage(formData.name || '', formData.category || '')
+      }
+
       if (isEditMode && selectedMedicine) {
         await medicineService.update({
           id: selectedMedicine.id,
-          ...formData
+          ...submissionData
         })
         showToast('Medicine updated successfully', 'success')
       } else {
-        await medicineService.create(formData as MedicineCreateInput)
+        await medicineService.create(submissionData as MedicineCreateInput)
         showToast('Medicine added successfully', 'success')
       }
       
@@ -352,16 +384,32 @@ function InventoryContent() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="image" className="font-semibold">Image URL</Label>
+                  <Label htmlFor="image" className="font-semibold">Image URL (Optional)</Label>
                   <Input
                     id="image"
                     name="image"
                     value={formData.image}
                     onChange={handleInputChange}
-                    placeholder="Enter image URL"
+                    placeholder="Leave empty for auto-generated anime bottle"
                     className="h-11"
-                    required
                   />
+                  {!formData.image && formData.name && formData.category && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500 mb-2">Preview of auto-generated bottle:</p>
+                      <div className="relative w-24 h-24 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                        <img 
+                          src={getAnimeMedicineImage(formData.name, formData.category)}
+                          alt="Preview"
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.opacity = '0.7';
+                            target.style.backgroundColor = '#f3f4f6';
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end gap-4 pt-4">
@@ -462,9 +510,23 @@ function InventoryContent() {
                 {filteredMedicines.map((medicine) => (
                   <tr key={medicine.id} className="border-b last:border-0">
                     <td className="py-4">
-                      <div>
-                        <div className="font-medium">{medicine.name}</div>
-                        <div className="text-sm text-gray-500">{medicine.manufacturer}</div>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                          <img
+                            src={medicine.image || getAnimeMedicineImage(medicine.name, medicine.category)}
+                            alt={medicine.name}
+                            className="w-full h-full object-contain"
+                            onError={() => handleImageError(medicine.id)}
+                            style={{ 
+                              opacity: imageErrors[medicine.id] ? '0.7' : '1',
+                              backgroundColor: imageErrors[medicine.id] ? '#f3f4f6' : 'transparent'
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <div className="font-medium">{medicine.name}</div>
+                          <div className="text-sm text-gray-500">{medicine.manufacturer}</div>
+                        </div>
                       </div>
                     </td>
                     <td className="py-4">{medicine.category}</td>

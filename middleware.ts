@@ -3,145 +3,58 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
-// Define allowed API routes
-const DYNAMIC_ROUTES = [
-  '/api/orders',
-  '/api/users',
-  '/api/medicines',
-  '/api/auth'  // Add auth route
-] as const
-
-// Supported HTTP methods
-type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
-
-// Simple cache implementation
-const cache = new Map<string, { data: any; timestamp: number }>()
-const CACHE_DURATION = 60 * 1000 // 1 minute
-
-// Validate route access
-function isRouteAllowed(pathname: string): boolean {
-  return DYNAMIC_ROUTES.some(route => pathname.startsWith(route))
-}
-
-// Check cache for GET requests
-function getCachedData(key: string) {
-  const cached = cache.get(key)
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data
-  }
-  return null
-}
-
-// Set data in the cache
-function setCachedData(key: string, data: any) {
-  cache.set(key, { data, timestamp: Date.now() })
-}
-
-// Configure paths that require authentication
-const PROTECTED_PATHS = ['/admin', '/account']
+// Paths that require admin authentication
 const ADMIN_PATHS = ['/admin']
-const PUBLIC_PATHS = ['/', '/login', '/products']
-const PUBLIC_API_PATHS = ['/api/auth', '/api/medicines']
-const STATIC_PATHS = ['/_next', '/favicon.ico', '/images']
+// Paths that require user authentication
+const PROTECTED_PATHS = ['/account', '/orders']
+// Paths that are always accessible
+const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth', '/about']
 
-// Rate limiting map for brute force protection
-const rateLimit = new Map()
-
-// Configure rate limiting
-const RATE_LIMIT = {
-  window: 60 * 1000, // 1 minute
-  max: 50 // maximum requests per window
-}
-
-// Middleware function
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next()
-  const path = request.nextUrl.pathname
+  const { pathname } = request.nextUrl
 
-  // Add security headers
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
-  )
-
-  // Skip middleware for public and static paths
-  if (PUBLIC_PATHS.some(p => path.startsWith(p)) || 
-      STATIC_PATHS.some(p => path.startsWith(p)) ||
-      PUBLIC_API_PATHS.some(p => path.startsWith(p)) ||
-      path.match(/\.(ico|png|jpg|jpeg|gif|svg|css|js)$/)) {
-    return response
-  }
-
-  // Rate limiting
-  const ip = request.ip ?? 'anonymous'
-  const rateLimitKey = `${ip}:${path}`
-  const now = Date.now()
-
-  // Clean up old rate limit entries
-  for (const [key, data] of rateLimit.entries()) {
-    if (now - data.timestamp > RATE_LIMIT.window) {
-      rateLimit.delete(key)
-    }
-  }
-
-  // Check rate limit
-  const rateLimitData = rateLimit.get(rateLimitKey) ?? { count: 0, timestamp: now }
-  if (now - rateLimitData.timestamp > RATE_LIMIT.window) {
-    rateLimitData.count = 0
-    rateLimitData.timestamp = now
-  }
-  rateLimitData.count++
-  rateLimit.set(rateLimitKey, rateLimitData)
-
-  if (rateLimitData.count > RATE_LIMIT.max) {
-    return new NextResponse('Too Many Requests', { status: 429 })
+  // Skip middleware for public files and API routes (except admin API routes)
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/static') ||
+    pathname.startsWith('/api') && !pathname.startsWith('/api/admin')
+  ) {
+    return NextResponse.next()
   }
 
   // Get the token
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
-  })
+  const token = await getToken({ req: request })
 
-  // Check protected paths
-  if (PROTECTED_PATHS.some(prefix => path.startsWith(prefix))) {
-    if (!token) {
+  // Check if the path requires admin authentication
+  if (ADMIN_PATHS.some(path => pathname.startsWith(path))) {
+    if (!token || token.role !== 'admin') {
       const url = new URL('/login', request.url)
-      url.searchParams.set('callbackUrl', request.url)
+      url.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(url)
     }
-
-    // Check admin paths
-    if (ADMIN_PATHS.some(prefix => path.startsWith(prefix))) {
-      if (token.role !== 'admin') {
-        console.log('Non-admin access attempt:', path, 'by user role:', token.role)
-        return NextResponse.redirect(new URL('/', request.url))
-      }
-    }
   }
 
-  // For API routes that are not public, require authentication
-  if (path.startsWith('/api/') && !PUBLIC_API_PATHS.some(p => path.startsWith(p))) {
+  // Check if the path requires user authentication
+  if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      const url = new URL('/login', request.url)
+      url.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(url)
     }
   }
 
-  return response
+  return NextResponse.next()
 }
 
-// Configure which paths this middleware should run on
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * Match all request paths except:
+     * 1. /_next/ (Next.js internals)
+     * 2. /static (static files)
+     * 3. /_vercel (Vercel internals)
+     * 4. /favicon.ico, /sitemap.xml (SEO files)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next|static|_vercel|favicon.ico|sitemap.xml).*)',
   ],
-};
+}

@@ -43,7 +43,7 @@ export const mockMedicines: Medicine[] = [
     threshold: 60,
     manufacturer: "Bayer",
     expiryDate: "2025-11-30",
-    image: "https://images.unsplash.com/photo-1626285861696-9f0bf5a49c6d?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&q=80&w=800",
     dosage: "300mg",
     discount: "13% off"
   },
