@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { compare } from 'bcryptjs'
+import bcrypt from 'bcryptjs'
 import type { NextAuthOptions } from 'next-auth'
 import type { JWT } from 'next-auth/jwt'
 
@@ -51,7 +51,7 @@ const options: NextAuthOptions = {
 
         // Check if it's the admin user
         if (credentials.email === ADMIN_USER.email) {
-          const isValid = await compare(credentials.password, ADMIN_USER.password)
+          const isValid = await bcrypt.compare(credentials.password, ADMIN_USER.password)
           
           if (isValid) {
             return {
