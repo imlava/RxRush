@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { 
   Plus, 
   Search, 
@@ -29,7 +29,7 @@ import { toast } from 'react-hot-toast'
 import { showToast } from '@/app/contexts/CartContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function InventoryPage() {
+function InventoryContent() {
   const [medicines, setMedicines] = useState<Medicine[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -61,22 +61,13 @@ export default function InventoryPage() {
   }, [])
 
   useEffect(() => {
-    const filterParam = searchParams.get('filter')
-    if (filterParam === 'low') {
-      setStockFilter('low')
-    } else if (filterParam === 'out') {
-      setStockFilter('out')
-    }
+    const filter = searchParams?.get('filter') ?? '';
+    const category = searchParams?.get('category') ?? '';
+    const search = searchParams?.get('search') ?? '';
     
-    const categoryParam = searchParams.get('category')
-    if (categoryParam) {
-      setCategoryFilter(categoryParam)
-    }
-    
-    const searchParam = searchParams.get('search')
-    if (searchParam) {
-      setSearchTerm(searchParam)
-    }
+    setStockFilter(filter);
+    setCategoryFilter(category);
+    setSearchTerm(search);
   }, [searchParams])
 
   const loadMedicines = async () => {
@@ -188,22 +179,19 @@ export default function InventoryPage() {
   )
 
   const updateUrlWithFilters = () => {
-    const params = new URLSearchParams()
+    if (!router) return;
     
-    if (stockFilter !== 'all') {
-      params.set('filter', stockFilter)
-    }
+    const params = new URLSearchParams();
     
-    if (categoryFilter) {
-      params.set('category', categoryFilter)
-    }
+    if (stockFilter) params.set('filter', stockFilter);
+    if (categoryFilter) params.set('category', categoryFilter);
+    if (searchTerm) params.set('search', searchTerm);
     
-    if (searchTerm) {
-      params.set('search', searchTerm)
-    }
-    
-    const query = params.toString()
-    router.push(`/admin/inventory${query ? '?' + query : ''}`, { scroll: false })
+    const queryString = params.toString();
+    router.push(
+      `/admin/inventory${queryString ? `?${queryString}` : ''}`,
+      { scroll: false }
+    );
   }
 
   useEffect(() => {
@@ -505,5 +493,13 @@ export default function InventoryPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense fallback={<div>Loading inventory...</div>}>
+      <InventoryContent />
+    </Suspense>
   )
 } 
