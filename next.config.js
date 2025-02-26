@@ -36,17 +36,12 @@ const nextConfig = {
   // Vercel handles CORS automatically, so we can remove the headers config
   // async headers() { ... }
 
-  // Explicitly set PostCSS config
-  postcss: {
-    config: './postcss.config.js',
-  },
-
   // Explicitly set webpack config to help resolve modules
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // Add aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': __dirname,
+      '@': '/',
     };
     
     return config;
