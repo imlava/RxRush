@@ -5,8 +5,11 @@ import type { Medicine, MedicineCreateInput, MedicineUpdateInput } from '@/types
 import { mockMedicines } from '@/lib/data/medicines'
 import { ApiError, handleApiError } from '@/lib/api-utils'
 
+// Force dynamic to prevent caching issues
 export const dynamic = 'force-dynamic'
-export const revalidate = 3600 // Revalidate the data at most every hour
+
+// Remove revalidate as we're using dynamic
+// export const revalidate = 3600
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const medicine = result.find(m => m.id === id)
       if (!medicine) {
-        throw new ApiError(404, 'Medicine not found')
+        return NextResponse.json({ error: 'Medicine not found' }, { status: 404 })
       }
       return NextResponse.json(medicine)
     }
@@ -47,7 +50,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result)
   } catch (error) {
-    return handleApiError(error)
+    console.error('Error in GET /api/medicines:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 

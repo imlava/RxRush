@@ -40,7 +40,8 @@ function setCachedData(key: string, data: any) {
 // Configure paths that require authentication
 const PROTECTED_PATHS = ['/admin', '/account']
 const ADMIN_PATHS = ['/admin']
-const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth', '/api/medicines']
+const PUBLIC_PATHS = ['/', '/login', '/products']
+const PUBLIC_API_PATHS = ['/api/auth', '/api/medicines']
 const STATIC_PATHS = ['/_next', '/favicon.ico', '/images']
 
 // Rate limiting map for brute force protection
@@ -69,6 +70,7 @@ export async function middleware(request: NextRequest) {
   // Skip middleware for public and static paths
   if (PUBLIC_PATHS.some(p => path.startsWith(p)) || 
       STATIC_PATHS.some(p => path.startsWith(p)) ||
+      PUBLIC_API_PATHS.some(p => path.startsWith(p)) ||
       path.match(/\.(ico|png|jpg|jpeg|gif|svg|css|js)$/)) {
     return response
   }
@@ -122,7 +124,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // For API routes that are not public, require authentication
-  if (path.startsWith('/api/') && !PUBLIC_PATHS.some(p => path.startsWith(p))) {
+  if (path.startsWith('/api/') && !PUBLIC_API_PATHS.some(p => path.startsWith(p))) {
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

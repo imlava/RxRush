@@ -85,6 +85,13 @@ const options: NextAuthOptions = {
       }
     })
   ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -120,11 +127,8 @@ const options: NextAuthOptions = {
     signIn: '/login',
     error: '/login',
   },
-  session: {
-    strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
-  },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 }
 
 const handler = NextAuth(options)
