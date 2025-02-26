@@ -27,13 +27,22 @@ declare module 'next-auth/jwt' {
   }
 }
 
-// Admin user (you should move this to a secure configuration)
-const ADMIN_USER = {
-  id: '1',
-  email: 'admin@rxrush.com',
-  name: 'Admin',
-  role: 'admin',
-  password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of your admin password
+// Mock users (in a real app, these would be in a database)
+const USERS = {
+  admin: {
+    id: '1',
+    email: 'admin@rxrush.com',
+    name: 'Admin',
+    role: 'admin',
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of 'admin123'
+  },
+  user: {
+    id: '2',
+    email: 'user@rxrush.com',
+    name: 'Test User',
+    role: 'user',
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of 'user123'
+  }
 }
 
 const options: NextAuthOptions = {
@@ -49,17 +58,21 @@ const options: NextAuthOptions = {
           return null
         }
 
-        // Check if it's the admin user
-        if (credentials.email === ADMIN_USER.email) {
-          const isValid = await bcrypt.compare(credentials.password, ADMIN_USER.password)
-          
-          if (isValid) {
-            return {
-              id: ADMIN_USER.id,
-              email: ADMIN_USER.email,
-              name: ADMIN_USER.name,
-              role: ADMIN_USER.role
-            }
+        // Check if it's a valid user (admin or regular user)
+        const user = Object.values(USERS).find(u => u.email === credentials.email)
+        
+        if (!user) {
+          return null
+        }
+
+        const isValid = await bcrypt.compare(credentials.password, user.password)
+        
+        if (isValid) {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
           }
         }
 
@@ -67,10 +80,6 @@ const options: NextAuthOptions = {
       }
     })
   ],
-  session: {
-    strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -85,11 +94,22 @@ const options: NextAuthOptions = {
         session.user.id = token.id as string
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   },
   pages: {
     signIn: '/login',
     error: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
 }

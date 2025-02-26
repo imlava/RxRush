@@ -41,15 +41,9 @@ function setCachedData(key: string, data: any) {
 const rateLimit = new Map()
 
 // Configure paths that require authentication
-const PROTECTED_PATHS = [
-  '/admin',
-  '/admin/inventory',
-  '/admin/orders',
-  '/admin/customers',
-  '/admin/users',
-  '/admin/settings',
-  '/api/admin'
-]
+const PROTECTED_PATHS = ['/admin', '/account']
+const ADMIN_PATHS = ['/admin']
+const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth']
 
 // Configure rate limiting
 const RATE_LIMIT = {
@@ -70,6 +64,12 @@ export async function middleware(request: NextRequest) {
     'Content-Security-Policy',
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
   )
+
+  // Skip middleware for public paths and static files
+  if (PUBLIC_PATHS.some(p => path.startsWith(p)) || 
+      path.match(/\.(ico|png|jpg|jpeg|gif|svg|css|js)$/)) {
+    return response
+  }
 
   // Rate limiting
   const ip = request.ip ?? 'anonymous'
@@ -96,22 +96,22 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 })
   }
 
+  // Get the token
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+
   // Check protected paths
   if (PROTECTED_PATHS.some(prefix => path.startsWith(prefix))) {
-    try {
-      const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+    if (!token) {
+      const url = new URL('/login', request.url)
+      url.searchParams.set('callbackUrl', path)
+      return NextResponse.redirect(url)
+    }
 
-      if (!token) {
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
-
-      // Check admin role for admin paths
-      if (path.startsWith('/admin') && token.role !== 'admin') {
+    // Check admin paths
+    if (ADMIN_PATHS.some(prefix => path.startsWith(prefix))) {
+      if (token.role !== 'admin') {
         return NextResponse.redirect(new URL('/', request.url))
       }
-    } catch (error) {
-      console.error('Auth error:', error)
-      return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
@@ -165,12 +165,12 @@ export async function middleware(request: NextRequest) {
 // Configure which paths this middleware should run on
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/api/admin/:path*',
-    '/account/:path*',
-    '/login',
-    '/api/auth/:path*',
-    // Apply to all paths except static files, api routes, etc.
-    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };
