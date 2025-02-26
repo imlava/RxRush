@@ -35,7 +35,7 @@ const USERS = {
     name: 'Admin',
     role: 'admin',
     // This is the hashed version of 'admin123'
-    password: '$2a$12$rQDKqGq3.dUwvZd0vEPHPOGwU0Bp7E.bKvwIds6hWEPD5ZQD0Ydw2'
+    password: '$2a$10$oVAG2JoM78jl4/VF26XTiufzJwgnClq.Sc594VqBCFgsFH0PHfC5W'
   },
   user: {
     id: '2',
@@ -43,7 +43,7 @@ const USERS = {
     name: 'Test User',
     role: 'user',
     // This is the hashed version of 'user123'
-    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy'
+    password: '$2a$10$IVrIrCMUCPZaYoNIKlNHqOd5jcO4jB29DYvqoNnqwQqn8wF5WgCXi'
   }
 }
 

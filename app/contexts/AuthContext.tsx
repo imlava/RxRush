@@ -1,11 +1,13 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 interface User {
   id: string
   name: string
   email: string
+  role: string
 }
 
 interface AuthContextType {
@@ -22,51 +24,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    // Check if user is logged in
-    const checkLoggedIn = async () => {
-      try {
-        const response = await fetch('/api/auth', {
-          credentials: 'include'
-        })
-        const data = await response.json()
-        
-        if (data.status === 'authenticated' && data.user) {
-          setUser(data.user)
-          setIsAuthenticated(true)
-        } else {
-          setUser(null)
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Error checking authentication:', error)
-        setUser(null)
-        setIsAuthenticated(false)
-      } finally {
-        setIsLoading(false)
-      }
+    if (status === 'loading') {
+      setIsLoading(true)
+      return
     }
 
-    checkLoggedIn()
-  }, [])
+    if (status === 'authenticated' && session?.user) {
+      setUser(session.user as User)
+      setIsAuthenticated(true)
+    } else {
+      setUser(null)
+      setIsAuthenticated(false)
+    }
+    
+    setIsLoading(false)
+  }, [session, status])
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth?action=login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       })
 
-      const data = await response.json()
-
-      if (data.status === 'authenticated' && data.user) {
-        setUser(data.user)
-        setIsAuthenticated(true)
-      } else {
-        throw new Error(data.error || 'Login failed')
+      if (result?.error) {
+        throw new Error(result.error)
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -76,19 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const response = await fetch('/api/auth?action=logout', {
-        method: 'POST',
-        credentials: 'include'
-      })
-
-      const data = await response.json()
-      
-      if (data.status === 'unauthenticated') {
-        setUser(null)
-        setIsAuthenticated(false)
-      } else {
-        throw new Error('Logout failed')
-      }
+      await signOut({ redirect: false })
+      setUser(null)
+      setIsAuthenticated(false)
     } catch (error) {
       console.error('Logout error:', error)
       throw error

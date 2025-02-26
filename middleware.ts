@@ -40,7 +40,7 @@ function setCachedData(key: string, data: any) {
 // Configure paths that require authentication
 const PROTECTED_PATHS = ['/admin', '/account']
 const ADMIN_PATHS = ['/admin']
-const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth']
+const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth', '/api/medicines']
 const STATIC_PATHS = ['/_next', '/favicon.ico', '/images']
 
 // Rate limiting map for brute force protection
@@ -121,50 +121,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Only intercept API routes
-  if (!path.startsWith('/api/')) {
-    return response
-  }
-
-  // Skip middleware for auth routes to prevent caching
-  if (path.startsWith('/api/auth')) {
-    return response
-  }
-
-  // Validate route access for non-auth routes
-  if (!isRouteAllowed(path)) {
-    return NextResponse.json({ error: 'Route not found' }, { status: 404 })
-  }
-
-  const method = request.method as HTTPMethod
-  const queryParams = Object.fromEntries(request.nextUrl.searchParams.entries())
-  const cacheKey = `${method}:${path}:${JSON.stringify(queryParams)}`
-
-  // Check cache for GET requests
-  if (method === 'GET') {
-    const cachedData = getCachedData(cacheKey)
-    if (cachedData) {
-      return NextResponse.json(cachedData)
+  // For API routes that are not public, require authentication
+  if (path.startsWith('/api/') && !PUBLIC_PATHS.some(p => path.startsWith(p))) {
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }
 
-  // Check if the request is for an admin route
-  if (path.startsWith('/admin')) {
-    // Skip authentication for the login page
-    if (path === '/admin/auth') {
-      return response
-    }
-
-    // Check if user is authenticated
-    const isAuthenticated = request.cookies.get('adminAuthenticated')?.value === 'true'
-    
-    if (!isAuthenticated) {
-      // Redirect to login page if not authenticated
-      return NextResponse.redirect(new URL('/admin/auth', request.url))
-    }
-  }
-
-  // Continue to the API route
   return response
 }
 

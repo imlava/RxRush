@@ -29,10 +29,11 @@ export default function LoginForm() {
 
       if (result?.error) {
         toast.error('Invalid credentials')
+        setIsLoading(false)
         return
       }
 
-      // Check user role and redirect accordingly
+      // Success! Get the session to check user role
       const response = await fetch('/api/auth/session')
       const session = await response.json()
 
