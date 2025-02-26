@@ -4,21 +4,18 @@ export interface Medicine {
   description: string;
   category: string;
   price: number;
-  originalPrice?: number;
+  originalPrice: number;
   stock: number;
   threshold: number;
   manufacturer: string;
   expiryDate: string;
   image: string;
-  dosage?: string;
-  discount?: string;
+  dosage: string;
+  discount: string;
 }
 
-export interface MedicineCreateInput extends Omit<Medicine, 'id'> {}
-
-export interface MedicineUpdateInput extends Partial<Medicine> {
-  id: string;
-}
+export type MedicineCreateInput = Omit<Medicine, 'id'>;
+export type MedicineUpdateInput = Partial<Medicine> & { id: string };
 
 export interface CartItem {
   id: string;

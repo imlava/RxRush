@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { Medicine, MedicineCreateInput, MedicineUpdateInput } from '@/types/medicine'
 
-const medicines = [
-  { id: '1', name: 'Paracetamol', dosage: '500mg', price: 50, originalPrice: 60, discount: '17% off', description: 'Pain reliever and fever reducer' },
-  { id: '2', name: 'Ibuprofen', dosage: '400mg', price: 80, originalPrice: 100, discount: '20% off', description: 'Nonsteroidal anti-inflammatory drug' },
-  { id: '3', name: 'Amoxicillin', dosage: '250mg', price: 120, originalPrice: 150, discount: '20% off', description: 'Antibiotic to treat bacterial infections' },
-  { id: '4', name: 'Omeprazole', dosage: '20mg', price: 90, originalPrice: 100, discount: '10% off', description: 'Proton pump inhibitor for acid reflux' },
-  { id: '5', name: 'Cetirizine', dosage: '10mg', price: 70, originalPrice: 80, discount: '12.5% off', description: 'Antihistamine for allergy relief' },
-  { id: '6', name: 'Aspirin', dosage: '300mg', price: 40, originalPrice: 50, discount: '20% off', description: 'Blood thinner and pain reliever' },
-  { id: '7', name: 'Multivitamin', dosage: 'Daily tablet', price: 150, originalPrice: 180, discount: '16.7% off', description: 'Nutritional supplement' },
-  { id: '8', name: 'Metformin', dosage: '500mg', price: 100, originalPrice: 120, discount: '16.7% off', description: 'Oral diabetes medication' },
-]
+// Move the mock data to a separate file
+import { mockMedicines } from '@/lib/data/medicines'
+import { ApiError, handleApiError } from '@/lib/api-utils'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate the data at most every hour
 
 export async function GET(request: NextRequest) {
@@ -18,24 +13,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     const query = searchParams.get('query')?.toLowerCase()
+    const category = searchParams.get('category')
+    const inStock = searchParams.get('inStock')
 
-    let result = [...medicines]
+    let result = [...mockMedicines]
 
-    // Filter by ID if provided
+    // Filter by ID
     if (id) {
-      const medicine = medicines.find(m => m.id === id)
-      if (medicine) {
-        return NextResponse.json(medicine, {
-          headers: {
-            'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-          },
-        })
-      } else {
-        return NextResponse.json({ error: 'Medicine not found' }, { status: 404 })
+      const medicine = result.find(m => m.id === id)
+      if (!medicine) {
+        throw new ApiError(404, 'Medicine not found')
       }
+      return NextResponse.json(medicine)
     }
 
-    // Filter by search query if provided
+    // Apply filters
     if (query) {
       result = result.filter(m => 
         m.name.toLowerCase().includes(query) || 
@@ -43,16 +35,89 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(result, {
-      headers: {
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-      },
-    })
+    if (category) {
+      result = result.filter(m => m.category === category)
+    }
+
+    if (inStock === 'true') {
+      result = result.filter(m => m.stock > 0)
+    } else if (inStock === 'false') {
+      result = result.filter(m => m.stock === 0)
+    }
+
+    return NextResponse.json(result)
   } catch (error) {
-    console.error('Error in medicines API:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch medicines' },
-      { status: 500 }
-    )
+    return handleApiError(error)
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body: MedicineCreateInput = await request.json()
+    
+    // Validate required fields
+    const requiredFields = ['name', 'price', 'category', 'manufacturer', 'dosage']
+    for (const field of requiredFields) {
+      if (!(field in body)) {
+        throw new ApiError(400, `Missing required field: ${field}`)
+      }
+    }
+    
+    const newMedicine: Medicine = {
+      ...body,
+      id: (mockMedicines.length + 1).toString(),
+      stock: body.stock ?? 0,
+      threshold: body.threshold ?? 10,
+    }
+    
+    mockMedicines.push(newMedicine)
+    return NextResponse.json(newMedicine, { status: 201 })
+  } catch (error) {
+    return handleApiError(error)
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body: MedicineUpdateInput = await request.json()
+    
+    if (!body.id) {
+      throw new ApiError(400, 'Missing medicine ID')
+    }
+    
+    const index = mockMedicines.findIndex(m => m.id === body.id)
+    if (index === -1) {
+      throw new ApiError(404, 'Medicine not found')
+    }
+    
+    mockMedicines[index] = {
+      ...mockMedicines[index],
+      ...body
+    }
+    
+    return NextResponse.json(mockMedicines[index])
+  } catch (error) {
+    return handleApiError(error)
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    
+    if (!id) {
+      throw new ApiError(400, 'Missing medicine ID')
+    }
+    
+    const index = mockMedicines.findIndex(m => m.id === id)
+    if (index === -1) {
+      throw new ApiError(404, 'Medicine not found')
+    }
+    
+    mockMedicines.splice(index, 1)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return handleApiError(error)
   }
 }
