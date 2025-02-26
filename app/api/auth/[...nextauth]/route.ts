@@ -56,32 +56,38 @@ const options: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
-        // Check if it's a valid user (admin or regular user)
-        const user = Object.values(USERS).find(u => u.email === credentials.email)
-        
-        if (!user) {
-          console.log('User not found:', credentials.email)
-          return null
-        }
-
-        const isValid = await bcrypt.compare(credentials.password, user.password)
-        
-        if (isValid) {
-          console.log('Login successful for:', user.email, 'with role:', user.role)
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error('Missing credentials')
+            return null
           }
-        }
 
-        console.log('Invalid password for:', credentials.email)
-        return null
+          // Check if it's a valid user (admin or regular user)
+          const user = Object.values(USERS).find(u => u.email === credentials.email)
+          
+          if (!user) {
+            console.error('User not found:', credentials.email)
+            return null
+          }
+
+          const isValid = await bcrypt.compare(credentials.password, user.password)
+          
+          if (isValid) {
+            console.log('Login successful for:', user.email, 'with role:', user.role)
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role
+            }
+          }
+
+          console.error('Invalid password for:', credentials.email)
+          return null
+        } catch (error) {
+          console.error('Authorization error:', error)
+          return null
+        }
       }
     })
   ],
@@ -108,10 +114,6 @@ const options: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Handle admin redirects
-      if (url.startsWith('/admin')) {
-        return url
-      }
       // Allow relative URLs
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`
@@ -129,6 +131,19 @@ const options: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
+  logger: {
+    error(code, ...message) {
+      console.error(code, ...message)
+    },
+    warn(code, ...message) {
+      console.warn(code, ...message)
+    },
+    debug(code, ...message) {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(code, ...message)
+      }
+    }
+  }
 }
 
 const handler = NextAuth(options)
