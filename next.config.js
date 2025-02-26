@@ -1,50 +1,44 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Don't use 'output: "export"' as it forces static generation
-  output: 'standalone',
+  // Remove standalone output as it's not needed for Vercel
+  // output: 'standalone',
 
-  // Enable proper image optimization
   images: {
     domains: ['placehold.co', 'images.unsplash.com'],
-    // Don't use unoptimized: true unless absolutely necessary
+    // Add Vercel's image optimization
+    unoptimized: process.env.NODE_ENV === 'development',
   },
 
-  // Add proper environment variable handling
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
   },
 
-  // Ensure proper static generation
-  trailingSlash: true,
-  poweredByHeader: false,
+  // These are good defaults for Vercel
   reactStrictMode: true,
   swcMinify: true,
-  // Add rewrites to handle API routes properly
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/api/:path*',
-      },
-    ]
-  },
+
+  // Remove trailingSlash as Vercel handles this automatically
+  // trailingSlash: true,
+
+  // Remove poweredByHeader as Vercel handles this
+  // poweredByHeader: false,
+
+  // Remove rewrites as they're not needed on Vercel
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: '/api/:path*',
+  //     },
+  //   ]
+  // },
+
   experimental: {
     serverActions: true,
   },
-  // Add headers for better caching and security
-  async headers() {
-    return [
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
-        ]
-      }
-    ];
-  }
+
+  // Vercel handles CORS automatically, so we can remove the headers config
+  // async headers() { ... }
 };
 
 module.exports = nextConfig;
