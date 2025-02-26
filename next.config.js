@@ -33,10 +33,6 @@ const nextConfig = {
   //   ]
   // },
 
-  experimental: {
-    serverActions: true,
-  },
-
   // Vercel handles CORS automatically, so we can remove the headers config
   // async headers() { ... }
 };
