@@ -1,6 +1,31 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { compare, hash } from 'bcryptjs'
+import { compare } from 'bcryptjs'
+import type { NextAuthOptions } from 'next-auth'
+import type { JWT } from 'next-auth/jwt'
+
+declare module 'next-auth' {
+  interface User {
+    id: string
+    email: string
+    name: string
+    role: string
+  }
+  
+  interface Session {
+    user: User & {
+      id: string
+      role: string
+    }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    role?: string
+    id?: string
+  }
+}
 
 // Admin user (you should move this to a secure configuration)
 const ADMIN_USER = {
@@ -11,7 +36,7 @@ const ADMIN_USER = {
   password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LHHMQnWRKF4pPZQy' // hashed version of your admin password
 }
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -21,7 +46,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials')
+          return null
         }
 
         // Check if it's the admin user
@@ -38,12 +63,12 @@ const handler = NextAuth({
           }
         }
 
-        throw new Error('Invalid credentials')
+        return null
       }
     })
   ],
   session: {
-    strategy: 'jwt' as const,
+    strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
@@ -56,8 +81,8 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role
-        ;(session.user as any).id = token.id
+        session.user.role = token.role as string
+        session.user.id = token.id as string
       }
       return session
     }
@@ -67,6 +92,7 @@ const handler = NextAuth({
     error: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
-})
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST } 
