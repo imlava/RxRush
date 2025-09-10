@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from "react"
-import { toast as hotToast } from 'react-hot-toast'
+import { toast as hotToast, ToastOptions } from 'react-hot-toast'
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react'
 
 export interface ToastProps {
@@ -18,15 +18,15 @@ export interface ToastProps {
 const getToastIcon = (variant: string) => {
   switch (variant) {
     case 'success':
-      return React.createElement(CheckCircle, { className: "h-5 w-5 text-green-600" })
+      return <CheckCircle className="h-5 w-5 text-green-600" />
     case 'error':
-      return React.createElement(AlertCircle, { className: "h-5 w-5 text-red-600" })
+      return <AlertCircle className="h-5 w-5 text-red-600" />
     case 'warning':
-      return React.createElement(AlertTriangle, { className: "h-5 w-5 text-yellow-600" })
+      return <AlertTriangle className="h-5 w-5 text-yellow-600" />
     case 'info':
-      return React.createElement(Info, { className: "h-5 w-5 text-blue-600" })
+      return <Info className="h-5 w-5 text-blue-600" />
     default:
-      return React.createElement(Info, { className: "h-5 w-5 text-gray-600" })
+      return <Info className="h-5 w-5 text-gray-600" />
   }
 }
 
@@ -85,21 +85,72 @@ const getToastStyles = (variant: string) => {
   }
 }
 
+const CustomToastContent = ({ 
+  title, 
+  description, 
+  variant = 'default', 
+  action, 
+  onDismiss 
+}: ToastProps & { onDismiss?: () => void }) => {
+  return (
+    <div className="flex items-start space-x-3 w-full max-w-md">
+      <div className="flex-shrink-0 mt-1">
+        {getToastIcon(variant)}
+      </div>
+      <div className="flex-1 min-w-0">
+        {title && (
+          <div className="text-sm font-semibold mb-1">
+            {title}
+          </div>
+        )}
+        {description && (
+          <div className="text-sm opacity-90 leading-relaxed">
+            {description}
+          </div>
+        )}
+        {action && (
+          <button
+            onClick={action.onClick}
+            className="mt-2 text-xs font-medium underline hover:no-underline"
+          >
+            {action.label}
+          </button>
+        )}
+      </div>
+      {onDismiss && (
+        <button
+          onClick={onDismiss}
+          className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  )
+}
+
 export const useToast = () => {
   const toast = React.useCallback((props: ToastProps | string) => {
     if (typeof props === 'string') {
       return hotToast(props)
     }
 
-    const { variant = 'default', duration = 4000, title, description } = props
+    const { variant = 'default', duration = 4000, ...otherProps } = props
     const styles = getToastStyles(variant)
-    const message = title || description || ''
 
-    return hotToast(message, {
-      duration,
-      ...styles,
-      icon: getToastIcon(variant),
-    })
+    return hotToast.custom(
+      (t) => (
+        <CustomToastContent
+          {...otherProps}
+          variant={variant}
+          onDismiss={() => hotToast.dismiss(t.id)}
+        />
+      ),
+      {
+        duration,
+        ...styles,
+      }
+    )
   }, [])
 
   const success = React.useCallback((props: Omit<ToastProps, 'variant'> | string) => {
@@ -183,44 +234,26 @@ export const useToast = () => {
 
 // Export individual functions for convenience
 export const toast = (props: ToastProps | string) => {
-  if (typeof props === 'string') {
-    return hotToast(props)
-  }
-  const { variant = 'default', duration = 4000, title, description } = props
-  const styles = getToastStyles(variant)
-  const message = title || description || ''
-  
-  return hotToast(message, {
-    duration,
-    ...styles,
-    icon: getToastIcon(variant),
-  })
+  const { toast: toastFn } = useToast()
+  return toastFn(props)
 }
 
 export const toastSuccess = (props: Omit<ToastProps, 'variant'> | string) => {
-  if (typeof props === 'string') {
-    return hotToast.success(props, getToastStyles('success'))
-  }
-  return toast({ ...props, variant: 'success' })
+  const { success } = useToast()
+  return success(props)
 }
 
 export const toastError = (props: Omit<ToastProps, 'variant'> | string) => {
-  if (typeof props === 'string') {
-    return hotToast.error(props, getToastStyles('error'))
-  }
-  return toast({ ...props, variant: 'error' })
+  const { error } = useToast()
+  return error(props)
 }
 
 export const toastWarning = (props: Omit<ToastProps, 'variant'> | string) => {
-  if (typeof props === 'string') {
-    return hotToast(props, getToastStyles('warning'))
-  }
-  return toast({ ...props, variant: 'warning' })
+  const { warning } = useToast()
+  return warning(props)
 }
 
 export const toastInfo = (props: Omit<ToastProps, 'variant'> | string) => {
-  if (typeof props === 'string') {
-    return hotToast(props, getToastStyles('info'))
-  }
-  return toast({ ...props, variant: 'info' })
+  const { info } = useToast()
+  return info(props)
 }

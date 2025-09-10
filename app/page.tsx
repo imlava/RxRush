@@ -76,7 +76,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-20 pb-20">{/* Hero Section */}
+    <div className="space-y-20 pb-20">
+      {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 overflow-hidden">
         <div className="absolute inset-0 bg-white/50"></div>
         <div className="relative container mx-auto px-4 py-20">
@@ -137,14 +138,14 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative z-10">
                 <Image
-                  src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=2231&auto=format&fit=crop"
-                  alt="AI-Powered Pharmacy Delivery"
+                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=2940&auto=format&fit=crop"
+                  alt="Pharmacy delivery"
                   width={600}
                   height={500}
-                  className="rounded-2xl shadow-2xl"
+                  className="object-cover rounded-2xl shadow-xl"
                 />
               </div>
-              {/* Floating AI Badge */}
+              {/* Floating AI Assistant Badge */}
               <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
                 <div className="flex items-center space-x-2">
                   <Bot className="h-6 w-6 text-blue-600" />
@@ -172,15 +173,11 @@ export default function HomePage() {
       {/* AI Features Section */}
       <section className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <Bot className="h-4 w-4" />
-            <span>Powered by Artificial Intelligence</span>
-          </div>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Smart Healthcare Technology
+            Why Choose RxRush?
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our AI-driven platform revolutionizes pharmacy delivery with intelligent order management, voice assistance, and predictive logistics.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Experience the future of pharmacy delivery with our comprehensive platform designed for speed, safety, and convenience.
           </p>
         </div>
         
@@ -221,102 +218,57 @@ export default function HomePage() {
           {features.map((feature, index) => {
             const Icon = feature.icon
             return (
-              <div key={feature.title} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
-                <div className={`inline-block p-3 rounded-lg ${feature.color} mb-4`}>
-                  <Icon className="h-6 w-6" />
+              <div key={feature.title} className="group relative">
+                <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group-hover:transform group-hover:scale-105">
+                  <div className={`${feature.color} w-16 h-16 rounded-lg flex items-center justify-center mb-6`}>
+                    <Icon className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
               </div>
             )
           })}
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="bg-gray-50">
+      {/* Newsletter Section */}
+      <section className="bg-gradient-to-r from-green-50 to-blue-50">
         <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              What Our Customers Say
-            </h2>
-            <p className="text-gray-600">Real feedback from real users</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Priya Sharma",
-                location: "Mumbai",
-                rating: 5,
-                comment: "Amazing service! Got my medicines in 25 minutes. The AI chat support was super helpful."
-              },
-              {
-                name: "Raj Patel",
-                location: "Delhi",
-                rating: 5,
-                comment: "Love the voice IVR system. Can place orders hands-free while driving. Very convenient!"
-              },
-              {
-                name: "Dr. Anil Kumar",
-                location: "Bangalore",
-                rating: 5,
-                comment: "As a doctor, I appreciate the prescription verification system. Very professional service."
-              }
-            ].map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4 italic">"{testimonial.comment}"</p>
-                <div>
-                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                  <div className="text-sm text-gray-500">{testimonial.location}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-        <div className="container mx-auto px-4 py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
-                Your Health, <br />
-                <span className="text-green-600">Our Priority</span>
-              </h1>
-              <p className="text-lg text-gray-600 max-w-lg">
-                RxRush brings you a wide range of medicines and healthcare products, 
-                delivered right to your doorstep with just a few clicks.
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold text-gray-900">
+                Stay Updated with Health Tips & Offers
+              </h2>
+              <p className="text-gray-600">
+                Subscribe to our newsletter for the latest health tips, product updates, and exclusive offers delivered right to your inbox.
               </p>
-              <form onSubmit={handleSearch} className="relative max-w-lg">
-                <input
-                  type="text"
-                  placeholder="Search for medicines..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <form className="flex gap-2 p-2 bg-white rounded-xl shadow-lg border max-w-md">
+                <div className="flex-1 flex items-center space-x-3 px-4">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    className="flex-1 py-3 border-0 outline-none text-gray-700 placeholder-gray-400"
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                 >
-                  Search
+                  Subscribe
                 </button>
               </form>
             </div>
-            <div className="relative h-[400px] lg:h-[500px]">
+            <div className="relative">
               <Image
-                src="https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2940&auto=format&fit=crop"
-                alt="Medicines and healthcare"
-                fill
+                src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2940&auto=format&fit=crop"
+                alt="Newsletter"
+                width={500}
+                height={400}
                 className="object-cover rounded-2xl shadow-xl"
               />
             </div>
@@ -338,16 +290,12 @@ export default function HomePage() {
           {features.map((feature) => {
             const Icon = feature.icon
             return (
-              <div key={feature.title} className="bg-white rounded-xl p-6 shadow-sm">
-                <div className={`inline-block p-3 rounded-lg ${feature.color} mb-4`}>
-                  <Icon className="h-6 w-6" />
+              <div key={feature.title} className="text-center space-y-4">
+                <div className={`w-16 h-16 mx-auto rounded-full ${feature.color} flex items-center justify-center`}>
+                  <Icon className="h-8 w-8" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
+                <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </div>
             )
           })}
@@ -378,15 +326,13 @@ export default function HomePage() {
               Our mission is to revolutionize the way people access healthcare products by 
               providing a seamless online experience, backed by expert support and reliable delivery.
             </p>
-            <div className="pt-4">
-              <Link 
-                href="/about"
-                className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium"
-              >
-                Learn more about us
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+            <Link 
+              href="/about"
+              className="inline-flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <span>Learn More</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
