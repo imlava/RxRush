@@ -1,49 +1,46 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
 import type { NextAuthOptions } from 'next-auth'
-import type { JWT } from 'next-auth/jwt'
+import type { UserRole } from '../../../../types/user'
 
-declare module 'next-auth' {
-  interface User {
-    id: string
-    email: string
-    name: string
-    role: string
-  }
-  
-  interface Session {
-    user: User & {
-      id: string
-      role: string
-    }
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    role?: string
-    id?: string
-  }
-}
+// Import bcrypt dynamically to avoid potential SSR issues
+const bcrypt = require('bcryptjs')
 
 // Mock users (in a real app, these would be in a database)
 const USERS = {
   admin: {
     id: '1',
     email: 'admin@rxrush.com',
-    name: 'Admin',
-    role: 'admin',
+    name: 'Admin User',
+    role: 'admin' as UserRole,
     // This is the hashed version of 'admin123'
     password: '$2a$10$oVAG2JoM78jl4/VF26XTiufzJwgnClq.Sc594VqBCFgsFH0PHfC5W'
   },
-  user: {
+  customer: {
     id: '2',
-    email: 'user@rxrush.com',
-    name: 'Test User',
-    role: 'user',
-    // This is the hashed version of 'user123'
-    password: '$2a$10$IVrIrCMUCPZaYoNIKlNHqOd5jcO4jB29DYvqoNnqwQqn8wF5WgCXi'
+    email: 'customer@example.com',
+    name: 'John Customer',
+    role: 'customer' as UserRole,
+    // This is the hashed version of 'customer123'
+    password: '$2a$10$SmzyP0ckGa/8UI6o/7e97ejRIHiYhyKnKLsHm.Xls1rd/BfZw42F2'
+  },
+  pharmacy: {
+    id: '3',
+    email: 'pharmacy@rxrush.com',
+    name: 'Pharmacy Manager',
+    role: 'pharmacy' as UserRole,
+    pharmacyId: 'pharmacy-001',
+    // This is the hashed version of 'pharmacy123'
+    password: '$2a$10$XJ8LPxKdSfM2lFbc8urJwOTzjEADHyvRlZI05CPGe9FdoZXi.b0Xi'
+  },
+  // Additional test users
+  customer2: {
+    id: '4',
+    email: 'jane@example.com',
+    name: 'Jane Doe',
+    role: 'customer' as UserRole,
+    // This is the hashed version of 'test123'
+    password: '$2a$10$x5DCCKmCW3T0q3LaBNzhLuUDRlbJ47v3HXfKLp82w1PZY1hwiODg.'
   }
 }
 
@@ -103,17 +100,28 @@ const options: NextAuthOptions = {
       if (user) {
         token.role = user.role
         token.id = user.id
+        if (user.role === 'pharmacy') {
+          token.pharmacyId = user.pharmacyId
+        }
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as string
+        session.user.role = token.role as UserRole
         session.user.id = token.id as string
+        if (token.pharmacyId) {
+          session.user.pharmacyId = token.pharmacyId as string
+        }
       }
       return session
     },
     async redirect({ url, baseUrl }) {
+      // After successful login, redirect to our custom auth-redirect page
+      if (url.startsWith('/login') || url === baseUrl) {
+        return `${baseUrl}/auth-redirect`
+      }
+      
       // Allow relative URLs
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`
@@ -122,6 +130,7 @@ const options: NextAuthOptions = {
       if (url.startsWith(baseUrl)) {
         return url
       }
+      
       return baseUrl
     }
   },

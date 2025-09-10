@@ -10,7 +10,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <ProtectedRoute requireAdmin>
+    <ProtectedRoute requireAdmin allowPharmacy>
       <div className="min-h-screen bg-gray-100">
         <Sidebar />
         <div className="md:pl-64 flex flex-col min-h-screen">

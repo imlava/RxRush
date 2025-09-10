@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'user'
+export type UserRole = 'admin' | 'customer' | 'pharmacy'
 
 export interface User {
   id: string
@@ -13,6 +13,7 @@ export interface User {
     postalCode: string
     country: string
   }
+  pharmacyId?: string // For pharmacy users
   createdAt: string
   updatedAt: string
 }

@@ -20,9 +20,9 @@ const mockUsers: User[] = [
   },
   {
     id: "2",
-    email: "john@example.com",
-    name: "John Doe",
-    role: "user",
+    email: "customer@example.com",
+    name: "John Customer",
+    role: "customer",
     phone: "+91 9876543211",
     address: {
       street: "456 User Lane",
@@ -33,21 +33,38 @@ const mockUsers: User[] = [
     },
     createdAt: "2024-02-01T00:00:00Z",
     updatedAt: "2024-02-01T00:00:00Z"
+  },
+  {
+    id: "3",
+    email: "pharmacy@rxrush.com",
+    name: "Pharmacy Manager",
+    role: "pharmacy",
+    phone: "+91 9876543212",
+    pharmacyId: "pharmacy-001",
+    address: {
+      street: "789 Pharmacy Road",
+      city: "Bangalore",
+      state: "Karnataka",
+      postalCode: "560001",
+      country: "India"
+    },
+    createdAt: "2024-03-01T00:00:00Z",
+    updatedAt: "2024-03-01T00:00:00Z"
   }
 ]
 
-// Generate more mock users
+// Generate more mock customers
 const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata']
 const states = ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal']
 
-for (let i = 3; i <= 20; i++) {
+for (let i = 4; i <= 20; i++) {
   const cityIndex = Math.floor(Math.random() * cities.length)
   const createdAt = new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString()
   
   mockUsers.push({
     id: i.toString(),
-    email: `user${i}@example.com`,
-    name: `User ${i}`,
+    email: `customer${i}@example.com`,
+    name: `Customer ${i}`,
     role: "user" as UserRole,
     phone: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
     address: {
@@ -89,7 +106,7 @@ export const userService = {
     const newUser = {
       ...user,
       id: (mockUsers.length + 1).toString(),
-      role: 'user' as UserRole,
+      role: 'customer' as UserRole,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -126,7 +143,7 @@ export const userService = {
   getStats: async () => {
     const total = mockUsers.length
     const admins = mockUsers.filter(u => u.role === 'admin').length
-    const users = mockUsers.filter(u => u.role === 'user').length
+    const users = mockUsers.filter(u => u.role === 'customer').length
     const activeThisMonth = mockUsers.filter(u => {
       const lastMonth = new Date()
       lastMonth.setMonth(lastMonth.getMonth() - 1)

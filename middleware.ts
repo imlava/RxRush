@@ -3,12 +3,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
-// Paths that require admin authentication
-const ADMIN_PATHS = ['/admin']
+// Paths that require admin authentication (admin only)
+const ADMIN_ONLY_PATHS = ['/admin/users']
+// Paths that require admin or pharmacy authentication  
+const ADMIN_PHARMACY_PATHS = ['/admin']
 // Paths that require user authentication
 const PROTECTED_PATHS = ['/account', '/orders']
 // Paths that are always accessible
-const PUBLIC_PATHS = ['/', '/login', '/products', '/api/auth', '/about']
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/products', '/api/auth', '/about']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -25,8 +27,8 @@ export async function middleware(request: NextRequest) {
   // Get the token
   const token = await getToken({ req: request })
 
-  // Check if the path requires admin authentication
-  if (ADMIN_PATHS.some(path => pathname.startsWith(path))) {
+  // Check if the path requires admin-only authentication
+  if (ADMIN_ONLY_PATHS.some(path => pathname.startsWith(path))) {
     if (!token || token.role !== 'admin') {
       const url = new URL('/login', request.url)
       url.searchParams.set('callbackUrl', pathname)
@@ -34,8 +36,17 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Check if the path requires admin or pharmacy authentication
+  else if (ADMIN_PHARMACY_PATHS.some(path => pathname.startsWith(path))) {
+    if (!token || (token.role !== 'admin' && token.role !== 'pharmacy')) {
+      const url = new URL('/login', request.url)
+      url.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(url)
+    }
+  }
+
   // Check if the path requires user authentication
-  if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
+  else if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
     if (!token) {
       const url = new URL('/login', request.url)
       url.searchParams.set('callbackUrl', pathname)

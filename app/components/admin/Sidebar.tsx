@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -15,44 +16,47 @@ import {
   ShoppingCart,
   Package,
   CreditCard,
-  MessageSquare
+  MessageSquare,
+  UserCheck,
+  Store
 } from 'lucide-react'
 
-const sidebarLinks = [
+const allSidebarLinks = [
   {
     href: '/admin',
     label: 'Dashboard',
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
+    roles: ['admin', 'pharmacy']
   },
   {
     href: '/admin/orders',
     label: 'Orders',
-    icon: ShoppingBag
-  },
-  {
-    href: '/admin/users',
-    label: 'Users',
-    icon: Users
-  },
-  {
-    href: '/admin/settings',
-    label: 'Settings',
-    icon: Settings
+    icon: ShoppingBag,
+    roles: ['admin', 'pharmacy']
   },
   {
     href: '/admin/inventory',
     label: 'Inventory',
-    icon: Package
+    icon: Package,
+    roles: ['admin', 'pharmacy']
   },
   {
-    href: '/admin/payments',
-    label: 'Payments',
-    icon: CreditCard
+    href: '/admin/customers',
+    label: 'Customers',
+    icon: Users,
+    roles: ['admin', 'pharmacy']
   },
   {
-    href: '/admin/support',
-    label: 'Support',
-    icon: MessageSquare
+    href: '/admin/users',
+    label: 'Users',
+    icon: UserCheck,
+    roles: ['admin'] // Only admin can manage users
+  },
+  {
+    href: '/admin/settings',
+    label: 'Settings',
+    icon: Settings,
+    roles: ['admin', 'pharmacy']
   }
 ]
 
@@ -60,16 +64,31 @@ export function Sidebar() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   const isActive = (path: string) => {
     return pathname === path
+  }
+
+  // Filter sidebar links based on user role
+  const sidebarLinks = allSidebarLinks.filter(link => 
+    link.roles.includes(session?.user?.role as string)
+  )
+
+  const getUserRoleDisplay = () => {
+    if (session?.user?.role === 'admin') return 'Administrator'
+    if (session?.user?.role === 'pharmacy') return 'Pharmacy Manager'
+    return 'User'
   }
 
   return (
     <>
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b px-4 py-3 flex items-center justify-between z-50">
-        <span className="font-semibold">RxRush Admin</span>
+        <div className="flex items-center space-x-2">
+          <Store className="h-6 w-6 text-green-600" />
+          <span className="font-semibold text-green-600">RxRush</span>
+        </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="text-gray-600 hover:text-gray-900"
@@ -92,7 +111,12 @@ export function Sidebar() {
         `}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b">
-          {!sidebarCollapsed && <span className="font-semibold">RxRush Admin</span>}
+          {!sidebarCollapsed && (
+            <div className="flex items-center space-x-2">
+              <Store className="h-6 w-6 text-green-600" />
+              <span className="font-semibold text-green-600">RxRush</span>
+            </div>
+          )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="hidden md:block text-gray-600 hover:text-gray-900"
@@ -100,6 +124,18 @@ export function Sidebar() {
             <ChevronLeft className={`h-5 w-5 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
           </button>
         </div>
+
+        {/* User Role Badge */}
+        {!sidebarCollapsed && (
+          <div className="px-4 py-3 bg-green-50 border-b">
+            <div className="text-xs text-green-700 font-medium">
+              {getUserRoleDisplay()}
+            </div>
+            <div className="text-xs text-green-600">
+              {session?.user?.name}
+            </div>
+          </div>
+        )}
 
         <nav className="p-4 space-y-2 mt-12 md:mt-0">
           {sidebarLinks.map((link) => {
@@ -111,7 +147,7 @@ export function Sidebar() {
                 className={`
                   flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
                   ${isActive(link.href) 
-                    ? 'bg-green-50 text-green-600' 
+                    ? 'bg-green-50 text-green-600 border border-green-200' 
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }
                 `}
@@ -122,6 +158,18 @@ export function Sidebar() {
               </Link>
             )
           })}
+          
+          {/* Back to Main Site Link */}
+          <div className="pt-4 border-t">
+            <Link
+              href="/"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Home className="h-5 w-5 shrink-0" />
+              {!sidebarCollapsed && <span>Back to Store</span>}
+            </Link>
+          </div>
         </nav>
       </aside>
 
