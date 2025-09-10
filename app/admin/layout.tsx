@@ -11,12 +11,10 @@ export default function AdminLayout({
 }) {
   return (
     <ProtectedRoute requireAdmin allowPharmacy>
-      <div className="min-h-screen bg-gray-100">
+      <div className="relative">
         <Sidebar />
-        <div className="md:pl-64 flex flex-col min-h-screen">
-          <div className="py-12 px-8">
-            {children}
-          </div>
+        <div className="md:pl-64">
+          {children}
         </div>
       </div>
     </ProtectedRoute>

@@ -83,20 +83,16 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b px-4 py-3 flex items-center justify-between z-50">
-        <div className="flex items-center space-x-2">
-          <Store className="h-6 w-6 text-green-600" />
-          <span className="font-semibold text-green-600">RxRush</span>
-        </div>
+      {/* Mobile Menu Button - only show on mobile and positioned relative to main header */}
+      <div className="md:hidden fixed top-20 left-4 z-50">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="text-gray-600 hover:text-gray-900"
+          className="bg-white border border-gray-300 rounded-lg p-2 shadow-sm text-gray-600 hover:text-gray-900"
         >
           {mobileMenuOpen ? (
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           ) : (
-            <Menu className="h-6 w-6" />
+            <Menu className="h-5 w-5" />
           )}
         </button>
       </div>
@@ -104,17 +100,17 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside 
         className={`
-          fixed md:fixed top-0 left-0 z-40 h-screen transition-transform duration-300
+          fixed top-16 left-0 z-20 transition-transform duration-300
           ${sidebarCollapsed ? 'w-16' : 'w-64'}
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          bg-white border-r
+          bg-white border-r overflow-y-auto
+          h-[calc(100vh-8rem)]
         `}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b">
+        <div className="flex items-center justify-between h-12 px-4 border-b bg-green-50">
           {!sidebarCollapsed && (
-            <div className="flex items-center space-x-2">
-              <Store className="h-6 w-6 text-green-600" />
-              <span className="font-semibold text-green-600">RxRush</span>
+            <div className="text-sm font-semibold text-green-700">
+              Admin Panel
             </div>
           )}
           <button
@@ -137,7 +133,7 @@ export function Sidebar() {
           </div>
         )}
 
-        <nav className="p-4 space-y-2 mt-12 md:mt-0">
+        <nav className="p-4 space-y-2">
           {sidebarLinks.map((link) => {
             const Icon = link.icon
             return (
@@ -176,7 +172,7 @@ export function Sidebar() {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 top-16 bg-black bg-opacity-50 z-30 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
