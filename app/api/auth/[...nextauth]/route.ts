@@ -117,20 +117,28 @@ const options: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
+      console.log('NextAuth redirect:', { url, baseUrl })
+      
       // After successful login, redirect to our custom auth-redirect page
       if (url.startsWith('/login') || url === baseUrl) {
-        return `${baseUrl}/auth-redirect`
+        const redirectUrl = `${baseUrl}/auth-redirect`
+        console.log('Redirecting to auth-redirect:', redirectUrl)
+        return redirectUrl
       }
       
       // Allow relative URLs
       if (url.startsWith('/')) {
-        return `${baseUrl}${url}`
+        const fullUrl = `${baseUrl}${url}`
+        console.log('Redirecting to relative URL:', fullUrl)
+        return fullUrl
       }
       // Allow same-origin URLs
       if (url.startsWith(baseUrl)) {
+        console.log('Redirecting to same-origin URL:', url)
         return url
       }
       
+      console.log('Defaulting to baseUrl:', baseUrl)
       return baseUrl
     }
   },

@@ -14,7 +14,7 @@ import {
   Shield,
   Building2
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/app/contexts/CartContext'
 import { Button } from '@/components/ui/button'
 
@@ -34,6 +34,7 @@ export default function Header() {
   const isActive = (path: string) => pathname === path
 
   const handleSignOut = () => {
+    setUserMenuOpen(false) // Close menu first
     signOut({ callbackUrl: '/' })
   }
 
@@ -42,6 +43,21 @@ export default function Header() {
     if (session?.user?.role === 'pharmacy') return <Building2 className="h-4 w-4" />
     return <User className="h-4 w-4" />
   }
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuOpen || mobileMenuOpen) {
+        setUserMenuOpen(false)
+        setMobileMenuOpen(false)
+      }
+    }
+
+    if (userMenuOpen || mobileMenuOpen) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [userMenuOpen, mobileMenuOpen])
 
   return (
     <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
@@ -79,71 +95,77 @@ export default function Header() {
             })}
 
             {/* User Menu */}
-            {status === 'loading' ? (
-              <div className="h-8 w-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-            ) : session ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-green-600"
-                >
-                  {getUserIcon()}
-                  <span>{session.user.name}</span>
-                </button>
-                
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border">
-                    <div className="px-4 py-2 border-b">
-                      <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
-                      <p className="text-xs text-gray-500">{session.user.email}</p>
-                      <p className="text-xs text-green-600 capitalize">{session.user.role}</p>
-                    </div>
-                    <div className="py-1">
-                      <Link
-                        href="/account"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <User className="h-4 w-4" />
-                          <span>Account</span>
-                        </div>
-                      </Link>
-                      {(session.user.role === 'admin' || session.user.role === 'pharmacy') && (
+            <div className="flex items-center space-x-4">
+              {status === 'loading' ? (
+                <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+              ) : session ? (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setUserMenuOpen(!userMenuOpen)
+                    }}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-green-600"
+                  >
+                    {getUserIcon()}
+                    <span>{session.user.name}</span>
+                  </button>
+                  
+                  {userMenuOpen && (
+                    <div 
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="px-4 py-2 border-b">
+                        <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
+                        <p className="text-xs text-gray-500">{session.user.email}</p>
+                        <p className="text-xs text-green-600 capitalize">{session.user.role}</p>
+                      </div>
+                      <div className="py-1">
                         <Link
-                          href="/admin"
+                          href="/account"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <div className="flex items-center space-x-2">
-                            {getUserIcon()}
-                            <span>Dashboard</span>
+                            <User className="h-4 w-4" />
+                            <span>Account</span>
                           </div>
                         </Link>
-                      )}
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <LogOut className="h-4 w-4" />
-                          <span>Sign Out</span>
-                        </div>
-                      </button>
+                        {(session.user.role === 'admin' || session.user.role === 'pharmacy') && (
+                          <Link
+                            href="/admin"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <div className="flex items-center space-x-2">
+                              {getUserIcon()}
+                              <span>Dashboard</span>
+                            </div>
+                          </Link>
+                        )}
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <LogOut className="h-4 w-4" />
+                            <span>Sign Out</span>
+                          </div>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
+                  )}
+                </div>
+              ) : (
                 <Link
                   href="/login"
                   className="text-gray-600 hover:text-green-600 font-medium"
                 >
                   Sign In
                 </Link>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button */}

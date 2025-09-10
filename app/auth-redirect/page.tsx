@@ -1,12 +1,14 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function PostLoginRedirect() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams?.get('callbackUrl')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -14,6 +16,13 @@ export default function PostLoginRedirect() {
     if (session?.user) {
       const role = session.user.role
       
+      // Check if there's a specific callback URL first
+      if (callbackUrl && !callbackUrl.includes('/login')) {
+        router.push(callbackUrl)
+        return
+      }
+      
+      // Role-based redirection
       if (role === 'admin') {
         router.push('/admin')
       } else if (role === 'pharmacy') {
@@ -24,7 +33,7 @@ export default function PostLoginRedirect() {
     } else {
       router.push('/login')
     }
-  }, [session, status, router])
+  }, [session, status, router, callbackUrl])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
