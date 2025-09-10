@@ -138,7 +138,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative z-10">
                 <Image
-                  src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=2940&auto=format&fit=crop"
+                  src="https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&q=80&w=800"
                   alt="Modern pharmacy with medicines and healthcare products"
                   width={600}
                   height={500}
