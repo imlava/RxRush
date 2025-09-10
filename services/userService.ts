@@ -65,7 +65,7 @@ for (let i = 4; i <= 20; i++) {
     id: i.toString(),
     email: `customer${i}@example.com`,
     name: `Customer ${i}`,
-    role: "user" as UserRole,
+    role: "customer" as UserRole,
     phone: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
     address: {
       street: `${Math.floor(Math.random() * 999) + 1} Street`,

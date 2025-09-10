@@ -95,7 +95,8 @@ export default function UsersPage() {
 
   const roleColors = {
     admin: 'bg-purple-50 text-purple-600',
-    user: 'bg-blue-50 text-blue-600'
+    customer: 'bg-blue-50 text-blue-600',
+    pharmacy: 'bg-green-50 text-green-600'
   }
 
   if (loading) {
@@ -234,7 +235,7 @@ export default function UsersPage() {
                       </button>
                       <div className="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-10">
                         <div className="py-1">
-                          {user.role === 'user' ? (
+                          {user.role !== 'admin' ? (
                             <button
                               onClick={() => handleUpdateRole(user.id, 'admin')}
                               className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
@@ -243,7 +244,7 @@ export default function UsersPage() {
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleUpdateRole(user.id, 'user')}
+                              onClick={() => handleUpdateRole(user.id, 'customer')}
                               className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
                             >
                               Remove Admin
