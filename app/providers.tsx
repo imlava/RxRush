@@ -14,24 +14,59 @@ export function Providers({ children }: { children: React.ReactNode }) {
             </CartProvider>
             <Toaster
                 position="top-right"
+                gutter={8}
+                containerClassName="z-[100]"
                 toastOptions={{
-                    duration: 3000,
+                    duration: 4000,
+                    className: 'font-medium',
                     style: {
-                        background: '#363636',
-                        color: '#fff',
+                        background: '#ffffff',
+                        color: '#374151',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        fontSize: '14px',
+                        maxWidth: '400px',
                     },
                     success: {
                         duration: 3000,
                         style: {
-                            background: '#059669',
-                            color: '#fff',
+                            background: '#f0fdf4',
+                            color: '#166534',
+                            border: '1px solid #bbf7d0',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        },
+                        iconTheme: {
+                            primary: '#16a34a',
+                            secondary: '#f0fdf4',
                         },
                     },
                     error: {
-                        duration: 4000,
+                        duration: 5000,
                         style: {
-                            background: '#dc2626',
-                            color: '#fff',
+                            background: '#fef2f2',
+                            color: '#991b1b',
+                            border: '1px solid #fecaca',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        },
+                        iconTheme: {
+                            primary: '#dc2626',
+                            secondary: '#fef2f2',
+                        },
+                    },
+                    loading: {
+                        style: {
+                            background: '#f9fafb',
+                            color: '#374151',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                         },
                     },
                 }}

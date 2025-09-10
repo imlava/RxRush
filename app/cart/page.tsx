@@ -17,18 +17,7 @@ export default function Cart() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleCheckout = async () => {
-    setIsCheckingOut(true);
-    try {
-      // Simulate checkout process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Order placed successfully!');
-      // You would typically handle the actual checkout process here
-    } catch (error) {
-      toast.error('Failed to process checkout');
-      console.error('Checkout error:', error);
-    } finally {
-      setIsCheckingOut(false);
-    }
+    router.push('/checkout');
   };
 
   // Format price in Indian Rupees
@@ -141,9 +130,9 @@ export default function Cart() {
               <Button
                 onClick={handleCheckout}
                 disabled={isCheckingOut}
-                className="w-full"
+                className="w-full bg-green-600 hover:bg-green-700"
               >
-                {isCheckingOut ? 'Processing...' : 'Checkout'}
+                Proceed to Checkout
               </Button>
             </Card>
           </div>
