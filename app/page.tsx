@@ -90,10 +90,10 @@ export default function HomePage() {
                 </div>
                 <h1 className="text-5xl font-bold text-gray-900 leading-tight">
                   Your Health,
-                  <span className="text-green-600"> Delivered Fast</span>
+                  <span className="text-green-600"> Our Priority</span>
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  India's first AI-powered pharmacy delivery platform. Get authentic medicines delivered to your doorstep in just 30 minutes with our smart logistics and voice-enabled support system.
+                  India's most trusted pharmacy delivery platform. Get authentic medicines delivered to your doorstep in just 30 minutes with our reliable logistics and dedicated customer support.
                 </p>
               </div>
 
@@ -130,7 +130,7 @@ export default function HomePage() {
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600">24/7</div>
-                  <div className="text-sm text-gray-600">AI Support</div>
+                  <div className="text-sm text-gray-600">Support</div>
                 </div>
               </div>
             </div>
@@ -138,20 +138,20 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative z-10">
                 <Image
-                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=2940&auto=format&fit=crop"
-                  alt="Pharmacy delivery"
+                  src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=2940&auto=format&fit=crop"
+                  alt="Modern pharmacy with medicines and healthcare products"
                   width={600}
                   height={500}
                   className="object-cover rounded-2xl shadow-xl"
                 />
               </div>
-              {/* Floating AI Assistant Badge */}
+              {/* Floating Support Badge */}
               <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
                 <div className="flex items-center space-x-2">
-                  <Bot className="h-6 w-6 text-blue-600" />
+                  <MessageCircle className="h-6 w-6 text-blue-600" />
                   <div>
-                    <div className="text-sm font-semibold">AI Assistant</div>
-                    <div className="text-xs text-gray-600">Online Now</div>
+                    <div className="text-sm font-semibold">Support</div>
+                    <div className="text-xs text-gray-600">Available 24/7</div>
                   </div>
                 </div>
               </div>
