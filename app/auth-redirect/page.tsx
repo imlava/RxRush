@@ -2,9 +2,9 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 
-export default function PostLoginRedirect() {
+function PostLoginRedirectComponent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -42,5 +42,24 @@ export default function PostLoginRedirect() {
         <p className="text-gray-600">Redirecting to your dashboard...</p>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="h-8 w-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function PostLoginRedirect() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PostLoginRedirectComponent />
+    </Suspense>
   )
 }
