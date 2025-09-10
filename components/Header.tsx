@@ -142,9 +142,6 @@ export default function Header() {
                 >
                   Sign In
                 </Link>
-                <Button asChild className="bg-green-600 hover:bg-green-700">
-                  <Link href="/login">Get Started</Link>
-                </Button>
               </div>
             )}
           </div>
